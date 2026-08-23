@@ -15,7 +15,7 @@ This repository distributes the installable builds. The source lives in
 
 ## What the app shows
 
-One window, ten categories behind one navigation rail. Every section opens
+One window, eleven categories behind one navigation rail. Every section opens
 with a plain-language summary of what its numbers say; a dot on a category
 means something new arrived since you last looked.
 
@@ -29,7 +29,8 @@ recommended floor, and what your sessions actually ran.
 ![Models](screenshots/models.png)
 
 **Tools** — what the harnesses are and do: the installed version of each CLI
-against the latest published release, and every capability your sessions
+against the latest published release on the channel you run (stable or
+prerelease), and every capability your sessions
 reached for in the last 30 days — subagents, web research, plan mode, skills
 — each with a line of documentation and its invocation count.
 
@@ -47,12 +48,26 @@ honest zero for a connector that is declared but idle.
 
 ![Connectors](screenshots/connectors.png)
 
+**Projects** — the working folders each client's sessions record, most
+recent first, with session counts: where the work actually went.
+
 **Practice · Mindfulness** — how you and the agent share the work (waiting,
 follow-ups, approvals), session tails, late-hour patterns, and a calibration
 probe that asks what you felt before showing what the logs say.
 
 **Advice · News · Documentation** — the one change most worth making,
 curated industry news, and the official references for both harnesses.
+
+### Two audiences
+
+The same readings speak to two kinds of work. The **coding** profile is
+the default. The **productivity** profile — for people whose work is
+documents, reports, presentations and analysis — re-words the model
+ladder for that audience, withholds the one git-derived figure with its
+reason, and leads the practice page with what the work actually was:
+every session classified by stated rules into document work, code work,
+research, organizing, or drafting. The switch sits in the page footer;
+nothing about what is collected changes.
 
 ### The break system
 
