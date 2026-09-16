@@ -1,153 +1,163 @@
-# PracticeGraph
+<p align="center">
+  <img src="docs/screenshots/usage.png" alt="PracticeGraph: the Usage page with the week's estimated value at API prices and the daily chart" width="880">
+</p>
 
-PracticeGraph is a behavioral mirror for people who work with AI coding
-agents. It reads the session logs that Claude Code and Codex already keep on
-your machine, computes everything locally, and shows you what your practice
-actually looks like — what the work costs, which models carry it, which
-capabilities of each harness you actually reach for, and what the pace of it
-is doing to your attention. Nothing is sent anywhere. The page is a reading
-of your own logs, not a score of you.
+<h1 align="center">PracticeGraph</h1>
 
-This repository distributes the installable builds. The source lives in
-[Practice-graph](https://github.com/TeamLandiLTD/Practice-graph) (private).
+<p align="center">
+  <strong>See your AI practice clearly.</strong><br>
+  A private daily reading of your work with Claude Code and Codex: what it costs, how you work, and what is worth changing. Computed on your machine. Nothing is sent anywhere.
+</p>
 
----
+<p align="center">
+  <a href="LICENSE"><img alt="Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-2f6f5e"></a>
+  <a href="https://github.com/TeamLandiLTD/practicegraph-app/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/TeamLandiLTD/practicegraph-app?display_name=tag&color=2f6f5e"></a>
+  <a href="https://github.com/TeamLandiLTD/practicegraph-app/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/TeamLandiLTD/practicegraph-app/actions/workflows/ci.yml/badge.svg"></a>
+  <img alt="Platforms" src="https://img.shields.io/badge/Windows-release-2f6f5e">
+  <img alt="Platforms" src="https://img.shields.io/badge/macOS%20%C2%B7%20Linux-candidates-8a8f8c">
+</p>
 
-## What the app shows
-
-One window, eleven categories behind one navigation rail. Every section opens
-with a plain-language summary of what its numbers say; a dot on a category
-means something new arrived since you last looked.
-
-**Spend** — what the work cost today and over your windows: per priced turn,
-cache reuse, what a piece of work runs, cost per commit.
-
-**Models** — the models available on each harness and what each is for, the
-reasoning-effort dial with your pinned default marked against the
-recommended floor, and what your sessions actually ran.
-
-![Models](screenshots/models.png)
-
-**Tools** — what the harnesses are and do: the installed version of each CLI
-against the latest published release on the channel you run (stable or
-prerelease), and every capability your sessions
-reached for in the last 30 days — subagents, web research, plan mode, skills
-— each with a line of documentation and its invocation count.
-
-![Tools](screenshots/tools.png)
-
-**Skills** — the skills installed for each client, each described by its own
-stated purpose, beside a registry shelf that never re-recommends what you
-already have.
-
-![Skills](screenshots/skills.png)
-
-**Connectors** — every MCP server and plugin each client's config declares,
-its on/off switch, and how much it was actually called — including the
-honest zero for a connector that is declared but idle.
-
-![Connectors](screenshots/connectors.png)
-
-**Projects** — the working folders each client's sessions record, most
-recent first, with session counts: where the work actually went.
-
-**Practice · Mindfulness** — how you and the agent share the work (waiting,
-follow-ups, approvals), session tails, late-hour patterns, and a calibration
-probe that asks what you felt before showing what the logs say.
-
-**Advice · News · Documentation** — the one change most worth making,
-curated industry news, and the official references for both harnesses.
-
-### Two audiences
-
-The same readings speak to two kinds of work. The **coding** profile is
-the default. The **productivity** profile — for people whose work is
-documents, reports, presentations and analysis — re-words the model
-ladder for that audience, withholds the one git-derived figure with its
-reason, and leads the practice page with what the work actually was:
-every session classified by stated rules into document work, code work,
-research, organizing, or drafting. The switch sits in the page footer;
-nothing about what is collected changes.
-
-### The break system
-
-The action bar carries a focus timer with three honest choices — a 90-minute
-focus block, a 10-minute movement break, a 25-minute long rest. When a break
-runs, the page dims and a guided panel takes over: a countdown, instructions
-that push the break away from the screen, and a bounded puzzle for the times
-you cannot leave the desk. On heavy days the app escalates its nudge, and
-tapping the reminder opens the app straight into the guided break.
-
-![Guided break](screenshots/guided-break.png)
+<p align="center">
+  <a href="#install">Install</a> ·
+  <a href="#what-the-app-shows">What the app shows</a> ·
+  <a href="#privacy">Privacy</a> ·
+  <a href="#documentation">Documentation</a> ·
+  <a href="#development">Development</a> ·
+  <a href="#contributing">Contributing</a> ·
+  <a href="https://practicegraph.dev">practicegraph.dev</a>
+</p>
 
 ---
 
-## Privacy model
+PracticeGraph reads the session logs your AI coding tools already keep and turns them into one page a day: estimated spend at listed API prices, the models and capabilities you actually reach for, the rhythm of the work, and a small hand-curated edition of what happened in AI that day. It compares you only with your own past. There are no scores of you, no streaks, no badges.
 
-- **Everything is computed on your machine**, from logs your tools already
-  write. The app never uploads usage, logs, or telemetry.
-- Outbound traffic is **read-only pulls** of published content: the rate
-  card, curated news, the model catalog, the documentation shelf, and each
-  harness's latest release tag. Every artifact is schema-validated and
-  fails closed.
-- Team emission exists but is **off by default** and gated behind explicit
-  consent in the Privacy Center.
+It is free and open source under Apache-2.0. No account, no trial clock, no license key. Your AI provider subscriptions are separate costs.
 
 ## Install
 
-These are **unsigned pilot builds**. Both operating systems will warn you
-once; the checksums below each release are the integrity check.
-
 ### Windows
 
-1. Download `PracticeGraph-<version>.msi` from the latest
-   [Release](../../releases).
-2. SmartScreen will object to an unsigned installer: *More info → Run
-   anyway*.
-3. The install is per-user (no administrator rights). It needs Microsoft
-   **WebView2**, which is present on any current Windows 10/11; the
-   installer will tell you if it is missing.
-4. PracticeGraph appears in the Start menu and as a tray icon; the
-   background agent refreshes readings about every 15 minutes while it runs.
+1. Download `PracticeGraph-<version>.msi` from the [latest release](https://github.com/TeamLandiLTD/practicegraph-app/releases/latest).
+2. Run it. The install is per-user and needs no administrator rights. It uses Microsoft WebView2, which is present on current Windows 10 and 11; the installer tells you if it is missing.
+3. Open PracticeGraph from the Start menu. A tray icon keeps the readings fresh about every 15 minutes while it runs.
 
-Data lives under `%LOCALAPPDATA%\PracticeGraph` and your user data dir —
-uninstalling removes the app, never your data.
+Builds are not yet Authenticode-signed, so SmartScreen objects once: choose *More info → Run anyway*. Verify the download against the SHA-256 published with the release. Upgrading is install-over-install; your data is never touched by the installer.
 
-### macOS
+### macOS and Linux
 
-1. Download `PracticeGraph-<version>-macos-x86_64.zip` from the latest
-   [Release](../../releases) and unzip it into `/Applications`.
-2. The build is ad-hoc signed and not notarized, so Gatekeeper will
-   quarantine a downloaded copy. Clear it once:
+Native shells exist for both (a Swift menu-bar app, and a GTK window with an Ubuntu 24.04 package). They build from this repository and pass CI as candidates, but signed downloads are not published yet. See [Install](docs/INSTALL.md) for building a candidate yourself and what remains before a public download.
 
-   ```bash
-   xattr -dr com.apple.quarantine /Applications/PracticeGraph.app
-   ```
+### Supported sources
 
-   or open it once and allow it under *System Settings → Privacy &
-   Security*.
-3. The app is a menu-bar item; opening it computes the current reading.
-   This build is **Intel (x86_64)** — it runs on Apple Silicon through
-   Rosetta. A native arm64 build and a notarized package are planned.
-4. The scheduled background tick (notifications, daily content pulls) is
-   installed separately in this pilot — the app itself computes fresh
-   readings every time you open it.
+| Tool | What is read | Where |
+| --- | --- | --- |
+| Claude Code CLI | Session transcripts (parent and subagent transcripts deduplicated) | `~/.claude/projects`, `~/.config/claude/projects`, `CLAUDE_CONFIG_DIR` |
+| OpenAI Codex CLI | Rollout logs and archived sessions | `~/.codex/sessions`, honoring `CODEX_HOME` |
+| Claude Desktop (macOS) | Embedded coding sessions | `~/Library/Application Support/Claude/…/.claude/projects` |
 
-Data lives under `~/.local/share/practicegraph`.
+Parsers keep counters and presence flags only. Prompt and response text never reaches the store.
 
-## Versioning
+## What the app shows
 
-Releases follow a single `0.1.N` pilot line. The rules:
+One window, one row of pages. Every page opens with a plain-language line about what its numbers mean, and a dot marks a page where something changed since you last looked.
 
-- **One release per build, one build per version.** A version number is
-  never rebuilt or reused; any change, however small, gets the next `N`.
-- Windows and macOS artifacts in a release are built **from the same
-  source tree**, so a version number means the same app on both.
-- Every release carries a `SHA256SUMS.txt`; verify a download with
-  `Get-FileHash` (Windows) or `shasum -a 256` (macOS).
-- The [Releases page](../../releases) is the complete ledger — what
-  changed, in plain language, with every artifact attached.
+**Usage.** The period's estimated value at listed API prices, compared with your own previous period, with a day-by-day chart, the model breakdown, unpriced turns called out, and the last recorded usage limits. Subscription users see the API-equivalent of their usage, which is a price comparison, not their bill.
 
-Upgrading is install-over-install on both platforms: run the newer MSI, or
-replace the `.app`. Your data directory is untouched and the store migrates
-itself forward on first open.
+**Models.** What each harness runs by default, the reasoning setting in use, and what your sessions actually ran.
+
+**API Prices.** The API market as one row per model: the developer's own price as the headline, every priced host behind an expander, and a computed flag wherever a direct host undercuts the developer on both input and output. A deals panel lists batch and off-peak tiers at half price and prices with an announced end date.
+
+<p align="center"><img src="docs/screenshots/api-prices.png" alt="API Prices: one row per model with the lowest price, cheaper hosts flagged, and the deals panel" width="880"></p>
+
+**Tools, Agent skills, Integrations.** The installed version of each CLI against its latest release, every capability your sessions reached for in the last 30 days with its count, the skills installed for each client with their stated purpose, and every MCP server or plugin your configs declare with how often it was actually called, including the honest zero.
+
+**Work rhythm.** Waiting time, follow-ups and approvals, session tails, late-hour patterns and the work mix, read from timing alone. Observations describe recorded behavior. They are not health assessments.
+
+**Focus and breaks.** A 90-minute focus block, a 10-minute movement break and a 25-minute rest, one click each. During a break the page dims and a guided panel takes over, with instructions that push the break away from the screen.
+
+**News, Community, Build ideas, Guides.** Three news picks a day chosen by hand from twenty to thirty candidates, a practitioner edition of what others measured, one buildable API idea per card, and the official training and certification links for each tool. Editions are downloaded as validated JSON and cached for offline reading.
+
+Estimated figures are marked as such throughout. A figure the app cannot support is withheld with its reason, never shown as zero.
+
+## Privacy
+
+- Everything is computed on your machine from logs your tools already write. The app has no upload path for usage, logs or telemetry.
+- Outbound traffic is read-only: published rate cards, curated editions and release tags, each schema-validated and failing closed. The hosts see ordinary HTTP metadata, never your activity.
+- Aggregate sharing to an optional self-hosted server is off by default, gated behind explicit consent, and limited to a closed anonymous schema. Optional provider-based wording is a separate, disclosed data flow.
+- The dashboard is served on loopback behind a per-session token. Uninstalling removes the app and never your data.
+
+The full boundary, what each command does and does not read, and how to verify it are in [Privacy](docs/PRIVACY.md).
+
+## How it works
+
+```
+Claude Code / Codex logs ──▶ parsers (counters, presence flags) ──▶ local SQLite store
+                                                                       │
+        tray / menu-bar shell ──▶ Python engine (deterministic analysis) ◀┘
+                  │                          │
+                  ▼                          ▼
+        native window (WebView2 / WKWebView / WebKitGTK) ◀── local UI server ── React dashboard
+```
+
+The engine is a Python 3.14 package with a standard-library core; identical inputs give byte-identical output, which the golden tests pin. The shells are thin native binaries (Rust on Windows, Swift on macOS, GTK on Linux) that schedule the engine and host the dashboard in a native window. See [Architecture](ARCHITECTURE.md) and the [product principles](PRINCIPLES.md) that every feature is held to.
+
+## Updates
+
+The installed app checks this repository's latest release once a day and shows a notice in the app, and one native toast per newer version outside your quiet hours. It never downloads or installs on its own. Release manifests are Ed25519-signed; see [Releasing](docs/RELEASING.md).
+
+## Documentation
+
+| I want to… | Read |
+| --- | --- |
+| Install, upgrade, uninstall, or find my data directory | [Install](docs/INSTALL.md) |
+| Understand what leaves my machine and what never does | [Privacy](docs/PRIVACY.md) |
+| Find my way around the pages and their addresses | [Reading and navigation](docs/UI_NAVIGATION.md) |
+| Understand the Usage numbers and their provenance | [Understanding Usage](docs/USAGE_EVIDENCE.md) |
+| Understand the API Prices page and the cheaper-host rule | [Token price tracker](docs/TOKEN_PRICES.md) |
+| Keep a private practice history or learning path | [Practice history](docs/PRACTICE_TIME.md) · [Learning paths](docs/TRAINING.md) |
+| Fix a problem | [Troubleshooting](docs/TROUBLESHOOTING.md) · [FAQ](docs/FAQ.md) |
+| Build from source on Windows, macOS or Linux | [Install](docs/INSTALL.md#build-from-source) · [Linux](docs/LINUX_BUILD.md) · [macOS](docs/MACOS_BUILD.md) |
+| Understand the design and its invariants | [Architecture](ARCHITECTURE.md) · [Requirements](REQUIREMENTS_SPEC.md) · [Principles](PRINCIPLES.md) |
+| See how editorial content is published and verified | [Hosted content](docs/HOSTED_CONTENT.md) · [Catalog encryption](docs/CATALOG_ENCRYPTION.md) |
+| Run the optional aggregate server for a team | [Server operations](docs/SERVER_OPS.md) |
+| Release, sign and verify builds | [Releasing](docs/RELEASING.md) · [Supply chain](docs/SUPPLY_CHAIN.md) · [Code signing](docs/CODE_SIGNING.md) |
+| See what changed | [Changelog](CHANGELOG.md) · [Releases](https://github.com/TeamLandiLTD/practicegraph-app/releases) |
+
+The [documentation index](docs/README.md) lists everything.
+
+## Development
+
+Python 3.14 and Node.js 22 or later.
+
+```bash
+python -m venv .venv
+. .venv/bin/activate            # Windows: .venv\Scripts\activate
+python -m pip install -e ".[dev]"
+
+practicegraph init              # local data directory and store
+practicegraph ui serve --open   # the dashboard, served from the built bundle
+practicegraph agent run --once  # one scheduler tick
+practicegraph doctor            # install health as closed JSON
+```
+
+The repository includes a built dashboard. For UI work, run `npm ci`, `npm test` and `npm run build` in `ui/`, and commit the rebuilt `webui/` with your change. Quality gates before any change lands:
+
+```bash
+python -m ruff check src tests
+python -m mypy
+python -m pytest
+```
+
+Golden files pin the rendered reports byte-for-byte; regenerate them with `python tests/regen_goldens.py` and review the diff like an API change. Native packaging is documented in [packaging/README.md](packaging/README.md).
+
+## Contributing
+
+Issues and pull requests are welcome. Start with a small issue that describes the user-visible problem, or a focused fix with what changed, why, and how you checked it. Use synthetic fixtures only; never attach real logs, prompts, tokens or private paths. The [contributing guide](CONTRIBUTING.md) has the details, [SECURITY.md](SECURITY.md) explains how to report a vulnerability privately, and the [code of conduct](CODE_OF_CONDUCT.md) applies everywhere in this project.
+
+- [Report a bug](https://github.com/TeamLandiLTD/practicegraph-app/issues/new?template=bug_report.yml)
+- [Suggest an idea](https://github.com/TeamLandiLTD/practicegraph-app/issues/new?template=idea.yml)
+- [Get help](SUPPORT.md)
+
+## License
+
+Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). The hand-curated editions served to the app are published separately under their own content terms; forks can point the app at another compatible catalog host. PracticeGraph is made by [Team Landi](https://teamlandi.com).

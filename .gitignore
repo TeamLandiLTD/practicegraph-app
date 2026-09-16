@@ -1,0 +1,37 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.worktrees/
+dist/
+dist-engine/
+build/
+nuitka-crash-report.xml
+packaging/cache/
+shell/target/
+deploy/.env
+
+# Code-signing material. Private keys must NEVER be committed; the public .cer
+# is a generated build/deploy artifact and belongs in the deployment channel
+# (GPO/Intune), not the repo. The signing scripts themselves ARE tracked.
+*.pfx
+*.p12
+*.snk
+*.key
+packaging/sign/*.cer
+!packaging/sign/*.ps1
+tools/news_candidates.json
+.agents/skills/curate-practicegraph-models/drafts/*.json
+.agents/skills/curate-practicegraph-models/rejected/*.json
+.agents/skills/curate-practicegraph-news/drafts/*.json
+.agents/skills/curate-practicegraph-news/rejected/*.json
+.agents/skills/build-ideas/drafts/*.json
+dist/sbom.json
+
+# Editorial work belongs in the private workspace, including local drafts.
+drafts/
+tools/*_draft.json
+tools/*_candidates.json

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  LaunchAgent for the PracticeGraph background tick.
+
+  On Windows the periodic agent tick (FR-ALR-1) runs inside the Rust shell's
+  SCM service. macOS has no service host in the shell (the Swift app is purely
+  a per-user UI shell), so the tick runs here instead: launchd fires the frozen
+  engine's agent one-shot on an interval, exactly the same core code path the
+  service invokes on Windows.
+
+  This is a per-user LaunchAgent (~/Library/LaunchAgents), not a system daemon:
+  PracticeGraph analyzes the logged-in user's own ~/.claude and ~/.codex logs,
+  so it must run as that user, matching the per-user Mac data dir
+  (~/.local/share/practicegraph). install-agent.sh substitutes @ENGINE@.
+
+  StartInterval mirrors DEFAULT_INTERVAL_S (900s). RunAtLoad does one tick when
+  you log in so the dashboard is fresh on first open.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>dev.practicegraph.agent</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>@ENGINE@</string>
+        <string>agent</string>
+        <string>run</string>
+        <string>--once</string>
+    </array>
+
+    <!-- 15 minutes, matching the engine's DEFAULT_INTERVAL_S. -->
+    <key>StartInterval</key>
+    <integer>900</integer>
+
+    <!-- One tick at login so first dashboard open is current. -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- The tick is a short batch job; do not resurrect it between intervals. -->
+    <key>KeepAlive</key>
+    <false/>
+
+    <!-- Be a good citizen: low priority, no throttling complaints for a job
+         that legitimately runs on a 15-minute cadence. -->
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>LowPriorityIO</key>
+    <true/>
+    <key>Nice</key>
+    <integer>5</integer>
+
+    <!-- The engine resolves its own data dir; we leave PRACTICEGRAPH_DATA_DIR
+         unset so it uses the per-user default (~/.local/share/practicegraph),
+         the same location the UI shell and `ui serve` use. Set it here only if
+         you override the data dir globally. -->
+
+    <!-- Discard output; the engine is silent by contract and tokens never ride
+         stdout, but keep logs clean regardless. -->
+    <key>StandardOutPath</key>
+    <string>/dev/null</string>
+    <key>StandardErrorPath</key>
+    <string>/dev/null</string>
+</dict>
+</plist>

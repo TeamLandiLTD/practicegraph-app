@@ -1,0 +1,35 @@
+# PracticeGraph — Caddy TLS termination example.
+#
+# The PracticeGraph server binds loopback (127.0.0.1:8321) and speaks plain
+# HTTP with bearer/basic credentials. It must NEVER be bound or published on a
+# non-loopback interface without a TLS-terminating proxy like this one in
+# front — the org token would travel in cleartext.
+#
+# Caddy provisions certificates automatically (ACME) when the hostname is
+# publicly resolvable; on an intranet, point `tls` at your internal PKI files.
+
+practicegraph.example-intranet {
+	# Internal PKI example (remove to use automatic ACME certificates):
+	# tls /etc/ssl/practicegraph/fullchain.pem /etc/ssl/practicegraph/privkey.pem
+
+	# HSTS: agents and dashboard browsers never downgrade to plaintext.
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+	# Ingest payloads are capped server-side at 64 KiB (NFR-SEC-3);
+	# reject oversized bodies at the edge too.
+	request_body {
+		max_size 128KB
+	}
+
+	reverse_proxy 127.0.0.1:8321
+}
+
+# Optional: plain-HTTP health passthrough for dumb load-balancer probes.
+# /healthz is unauthenticated and org-free (INV-2). Caddy already serves the
+# HTTPS /healthz via the site above; this block only adds an HTTP probe path
+# and redirects everything else to TLS.
+http://practicegraph.example-intranet {
+	@health path /healthz
+	reverse_proxy @health 127.0.0.1:8321
+	redir * https://{host}{uri} permanent
+}

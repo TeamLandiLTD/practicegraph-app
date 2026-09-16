@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PracticeGraph 2026-07-02</title>
+<style>
+:root {
+  --paper-0:#fcfbf8; --paper-50:#f6f3ec; --paper-100:#efe9df; --paper-200:#e3dccd;
+  --ink-900:#181d1b; --ink-800:#232b28; --ink-700:#39423d; --ink-600:#55605a;
+  --ink-500:#727d76; --ink-400:#97a09a;
+  --teal-900:#0f3730; --teal-800:#15473d; --teal-700:#1b574b; --teal-600:#226c5f;
+  --teal-500:#2f8576; --teal-400:#4ea191; --teal-300:#82bcae; --teal-200:#b6d8cf;
+  --teal-100:#dbece7; --teal-50:#ecf4f1;
+  --sage-500:#738069; --sage-200:#cdd4c2; --sage-100:#e4e8dc;
+  --positive-600:#2f7d57; --positive-100:#dcefe2;
+  --caution-600:#a9761b; --caution-100:#f4e7cc;
+  --critical-600:#b04a30;
+  --suppressed-fg:#8d958f; --suppressed-bg:#efece4; --suppressed-line:#cdc7ba;
+  --border-hair:#e7e0d3; --border-soft:#d8cfbd;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Iowan Old Style","Times New Roman",Times,serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --r-sm:6px; --r-md:10px; --r-lg:14px; --r-pill:999px;
+  --sh-sm:0 1px 3px rgba(24,40,35,.06),0 1px 2px rgba(24,40,35,.04);
+  --sh-md:0 4px 12px rgba(24,40,35,.07),0 1px 3px rgba(24,40,35,.05);
+}
+* { box-sizing:border-box; }
+html,body { margin:0; }
+body {
+  font-family:var(--sans); background:var(--paper-0); color:var(--ink-700);
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+.num { font-family:var(--mono); font-variant-numeric:tabular-nums lining-nums;
+       font-feature-settings:"tnum" 1,"lnum" 1; }
+.eyebrow { font-size:11.5px; font-weight:600; letter-spacing:.08em;
+           text-transform:uppercase; color:var(--ink-500); }
+.card { background:#fff; border:1px solid var(--border-hair); border-radius:var(--r-lg);
+        box-shadow:var(--sh-sm); padding:22px 24px; }
+.grid { display:grid; gap:18px; }
+.g-2 { grid-template-columns:1fr 1fr; }
+.g-3 { grid-template-columns:repeat(3,1fr); }
+.muted { color:var(--ink-500); }
+.lede { font-family:var(--serif); font-style:italic; font-size:16px;
+        color:var(--ink-700); line-height:1.5; }
+.sec-head { display:flex; align-items:baseline; justify-content:space-between;
+            margin-bottom:16px; gap:12px; }
+.sec-head .meta { font-family:var(--mono); font-size:11px; color:var(--ink-400); }
+.est { display:inline-block; vertical-align:middle; margin-left:10px;
+       font-family:var(--sans); font-size:11px; font-weight:600; color:var(--ink-400);
+       border:1px solid var(--border-soft); border-radius:var(--r-pill); padding:2px 8px; }
+.tag { font-size:11px; font-weight:600; padding:2px 8px; border-radius:var(--r-pill); }
+.tag.steady { background:var(--positive-100); color:var(--positive-600); }
+.tag.emerging { background:var(--caution-100); color:var(--caution-600); }
+.tag.leading { background:var(--teal-100); color:var(--teal-800); }
+.tag.quiet { background:var(--suppressed-bg); color:var(--suppressed-fg); }
+.trust { display:inline-flex; align-items:center; gap:8px; padding:8px 14px;
+         border-radius:var(--r-pill); background:var(--teal-50);
+         border:1px solid var(--teal-200); color:var(--teal-800);
+         font-size:12.5px; font-weight:600; white-space:nowrap; }
+.trust svg { width:15px; height:15px; }
+.suppressed-panel { display:flex; gap:12px; align-items:flex-start; padding:16px 18px;
+  border-radius:var(--r-lg); background:var(--suppressed-bg);
+  background-image:repeating-linear-gradient(45deg,transparent,transparent 7px,
+    rgba(141,149,143,.12) 7px,rgba(141,149,143,.12) 8px);
+  border:1px dashed var(--suppressed-line); color:var(--suppressed-fg); }
+.suppressed-panel svg { flex:none; margin-top:1px; width:20px; height:20px; }
+.suppressed-panel .t { font-size:14px; font-weight:600; color:var(--ink-700);
+                       margin-bottom:3px; }
+.suppressed-panel .d { font-size:13px; line-height:1.45; }
+.suppressed-panel .m { font-family:var(--mono); font-size:11.5px; margin-top:7px; }
+.foot { margin-top:28px; padding-top:18px; border-top:1px solid var(--border-hair);
+        display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+        font-size:12px; color:var(--ink-400); font-family:var(--mono); }
+
+.wrap { max-width:960px; margin:0 auto; padding:28px 28px 72px; }
+header.top { display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+.mark { width:38px; height:38px; border-radius:10px; background:var(--teal-600);
+        display:flex; align-items:center; justify-content:center; flex:none; }
+.brand { display:flex; flex-direction:column; gap:1px; }
+.brand .name { font-weight:700; font-size:16px; color:var(--ink-900);
+               letter-spacing:-.01em; }
+.brand .name b { color:var(--teal-700); font-weight:700; }
+.brand .sub { font-size:12.5px; color:var(--ink-500); }
+header.top .trust { margin-left:auto; }
+nav.tabs { display:flex; gap:2px; border-bottom:1px solid var(--border-hair);
+           margin-bottom:24px; flex-wrap:wrap; }
+nav.tabs a { padding:10px 15px; font-size:13.5px; font-weight:600;
+             color:var(--ink-500); text-decoration:none;
+             border-bottom:2px solid transparent; margin-bottom:-1px; }
+nav.tabs a:hover { color:var(--ink-700); }
+nav.tabs a.privacy { margin-left:auto; display:inline-flex; align-items:center; gap:6px; }
+nav.tabs a.privacy svg { width:14px; height:14px; }
+main .panel { display:none; scroll-margin-top:16px; }
+main .panel:target { display:flex; }
+body:not(:has(main .panel:target)) main #today { display:flex; }
+body:not(:has(main .panel:target)) nav.tabs a[href="#today"],
+body:has(#today:target) nav.tabs a[href="#today"],
+body:has(#range-week:target) nav.tabs a[href="#today"],
+body:has(#range-month:target) nav.tabs a[href="#today"],
+body:has(#range-all:target) nav.tabs a[href="#today"],
+body:has(#insights:target) nav.tabs a[href="#insights"],
+body:has(#sources:target) nav.tabs a[href="#sources"],
+body:has(#skills:target) nav.tabs a[href="#skills"],
+body:has(#privacy:target) nav.tabs a[href="#privacy"]
+  { color:var(--teal-800); border-bottom-color:var(--teal-600); }
+.stack { flex-direction:column; gap:18px; }
+.hero { display:grid; grid-template-columns:1.4fr 1fr; gap:28px; align-items:center; }
+.hero .figure { font-family:var(--mono); font-variant-numeric:tabular-nums;
+                font-size:54px; font-weight:600; color:var(--ink-900);
+                letter-spacing:-.02em; line-height:1; }
+.hero .ratecard { font-family:var(--mono); font-size:11.5px; color:var(--ink-500);
+                  margin-top:10px; }
+.herokpis { display:flex; gap:26px; flex-wrap:wrap; }
+.kpi .k { font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:21px;
+          font-weight:600; color:var(--ink-900); }
+.kpi .l { font-size:12px; color:var(--ink-500); margin-top:2px; }
+.kpi .k.good { color:var(--positive-600); }
+.mixbar { display:flex; height:14px; border-radius:var(--r-pill); overflow:hidden;
+          margin:4px 0 16px; background:var(--paper-100); }
+.mixbar span { display:block; height:100%; }
+.mixlegend { display:grid; grid-template-columns:1fr 1fr; gap:10px 22px; }
+.mixrow { display:flex; align-items:center; gap:10px; }
+.mixrow .dot { width:10px; height:10px; border-radius:3px; flex:none; }
+.mixrow .lab { font-size:13px; color:var(--ink-700); flex:1; }
+.mixrow .val { font-family:var(--mono); font-variant-numeric:tabular-nums;
+               font-size:13.5px; font-weight:600; color:var(--ink-900); }
+.mixrow .pct { font-family:var(--mono); font-size:11.5px; color:var(--ink-500);
+               width:38px; text-align:right; }
+table.usage { border-collapse:collapse; width:100%; font-size:13.5px; }
+table.usage th { text-align:left; font-size:11.5px; font-weight:600;
+                 letter-spacing:.08em; text-transform:uppercase;
+                 color:var(--ink-500); padding:0 10px 10px 0; }
+table.usage td { padding:9px 10px 9px 0; border-top:1px solid var(--border-hair);
+                 color:var(--ink-800); }
+table.usage th.n, table.usage td.n { text-align:right; font-family:var(--mono);
+  font-variant-numeric:tabular-nums; }
+table.usage td.model { font-family:var(--mono); font-size:12.5px;
+                       color:var(--ink-600); }
+details.quiet { background:var(--paper-50); border:1px solid var(--border-hair);
+                border-radius:var(--r-lg); }
+details.quiet > summary { list-style:none; cursor:pointer; padding:16px 22px;
+                          display:flex; align-items:center; gap:12px; }
+details.quiet > summary::-webkit-details-marker { display:none; }
+details.quiet > summary .chev { color:var(--ink-400); display:inline-flex; }
+details.quiet[open] > summary .chev { transform:rotate(90deg); }
+details.quiet .body { padding:0 22px 18px; }
+.srcrow { display:grid; grid-template-columns:1fr auto auto; gap:14px;
+          align-items:center; padding:12px 0;
+          border-top:1px solid var(--border-hair); }
+.srcrow:first-child { border-top:none; }
+.srcrow .nm { font-size:14px; font-weight:600; color:var(--ink-800); }
+.srcrow .meta { font-family:var(--mono); font-size:12px; color:var(--ink-500); }
+.privacy-hero { display:flex; gap:16px; align-items:flex-start; }
+.privacy-hero .shield { flex:none; width:46px; height:46px; border-radius:12px;
+  background:var(--teal-50); border:1px solid var(--teal-200); display:flex;
+  align-items:center; justify-content:center; color:var(--teal-700); }
+.privacy-hero .shield svg { width:24px; height:24px; }
+.pill-row { display:flex; flex-wrap:wrap; gap:10px; }
+.factpill { display:inline-flex; align-items:center; gap:8px; padding:8px 13px;
+  border-radius:var(--r-pill); background:var(--teal-50);
+  border:1px solid var(--teal-200); font-size:12.5px; font-weight:600;
+  color:var(--teal-800); font-family:var(--mono); }
+.payload { background:var(--ink-900); border-radius:var(--r-lg); padding:20px 22px;
+           overflow:auto; }
+.payload pre { margin:0; font-family:var(--mono); font-size:12.5px; line-height:1.65;
+               color:#cfe6df; white-space:pre; }
+.payload .k { color:#9fd0c4; }
+.payload .s { color:#e6d9a8; }
+.payload .b { color:#e89f86; font-weight:600; }
+.consent { display:flex; align-items:center; gap:12px; padding:14px 18px;
+           border-radius:var(--r-md); }
+.consent.on { background:var(--positive-100); border:1px solid var(--positive-600); }
+.consent.on .state { font-weight:700; color:var(--positive-600); }
+.consent.off { background:var(--paper-100); border:1px solid var(--border-soft); }
+.consent.off .state { font-weight:700; color:var(--ink-700); }
+.qstats { display:flex; gap:26px; flex-wrap:wrap; }
+code { font-family:var(--mono); font-size:12.5px; background:var(--paper-100);
+       border-radius:4px; padding:2px 7px; color:var(--ink-800); }
+ul.cmds { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:8px;
+          font-size:13.5px; color:var(--ink-600); }
+.wow { display:grid; grid-template-columns:auto auto 1fr; gap:26px;
+       align-items:center; }
+.delta .d { font-family:var(--mono); font-variant-numeric:tabular-nums;
+            font-size:24px; font-weight:600; }
+.delta .d.down { color:var(--positive-600); }
+.delta .d.up { color:var(--caution-600); }
+.delta .l { font-size:12px; color:var(--ink-500); margin-top:2px; }
+.chips { display:flex; flex-wrap:wrap; gap:10px; }
+.chip { display:inline-flex; align-items:center; gap:8px; padding:8px 13px;
+        border-radius:var(--r-md); border:1px solid var(--border-hair);
+        background:#fff; }
+.chip .dot { width:8px; height:8px; border-radius:999px; flex:none; }
+.chip .t { font-size:13px; font-weight:600; color:var(--ink-800); }
+.sugg { display:flex; gap:15px; padding:18px 0;
+        border-top:1px solid var(--border-hair); }
+.sugg:first-of-type { border-top:none; padding-top:0; }
+.sugg .n { font-family:var(--mono); font-size:13px; font-weight:600;
+           color:var(--teal-600); flex:none; width:24px; }
+.sugg .h { font-size:15px; font-weight:600; color:var(--ink-900);
+           margin-bottom:4px; }
+.sugg .r { font-size:13.5px; color:var(--ink-600); line-height:1.5; }
+.sugg .impact { font-family:var(--mono); font-size:12px; font-weight:600;
+                color:var(--caution-600); margin-top:6px; }
+.bars { display:flex; flex-direction:column; gap:11px; }
+.bar { display:grid; grid-template-columns:110px 1fr auto; gap:12px;
+       align-items:center; }
+.bar .lab { font-size:13.5px; font-weight:600; color:var(--ink-800); }
+.bar .track { height:9px; background:var(--paper-100);
+              border-radius:var(--r-pill); overflow:hidden; }
+.bar .fill { display:block; height:100%; background:var(--teal-500);
+             border-radius:var(--r-pill); }
+.bar .fill.q { background:var(--suppressed-line); }
+.bar .pct { font-family:var(--mono); font-variant-numeric:tabular-nums;
+            font-size:13px; font-weight:600; color:var(--ink-900); width:42px;
+            text-align:right; }
+.focusmetric { font-family:var(--mono); font-variant-numeric:tabular-nums;
+               font-size:34px; font-weight:600; color:var(--positive-600);
+               line-height:1; }
+.perfhead { display:flex; align-items:center; gap:16px; margin-bottom:14px; }
+.perf { border-top:1px solid var(--border-hair); padding:11px 0; display:flex;
+        flex-direction:column; gap:6px; }
+.perf:first-of-type { border-top:none; }
+.perf .row { display:grid; grid-template-columns:172px 1fr 40px 76px; gap:12px;
+             align-items:center; }
+.perf .lab { font-size:13.5px; font-weight:600; color:var(--ink-800); }
+.perf .track { height:9px; background:var(--paper-100);
+               border-radius:var(--r-pill); overflow:hidden; }
+.perf .fill { display:block; height:100%; background:var(--teal-500);
+              border-radius:var(--r-pill); }
+.perf .num { font-family:var(--mono); font-variant-numeric:tabular-nums;
+             font-size:13px; font-weight:600; color:var(--ink-900);
+             text-align:right; }
+.perf .ev { font-family:var(--mono); font-size:11.5px; color:var(--ink-500); }
+.verdict { font-family:Georgia,'Times New Roman',serif; font-size:21px;
+           line-height:1.5; color:var(--ink-900); margin:12px 0 2px; }
+.weekline { font-family:var(--mono); font-size:12px; color:var(--teal-800);
+            margin-top:8px; }
+.acts { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+.act { display:inline-flex; align-items:center; gap:8px; padding:9px 15px;
+       border-radius:var(--r-pill); font-size:13px; font-weight:600;
+       text-decoration:none; }
+.act.primary { background:var(--teal-700); color:#fff; }
+.act.quiet { border:1px solid var(--border-hair); color:var(--ink-700);
+             background:#fff; }
+.assembled { font-family:var(--mono); font-size:10.5px; color:var(--ink-400);
+             margin-top:14px; }
+.dim { border-top:1px solid var(--border-hair); padding:11px 0; }
+.dim:first-of-type { border-top:none; padding-top:2px; }
+.dim .row { display:grid; grid-template-columns:150px 132px 66px 1fr; gap:14px;
+            align-items:center; }
+.dim .lab { font-size:13.5px; font-weight:600; color:var(--ink-800); }
+.dim .score { font-family:var(--mono); font-variant-numeric:tabular-nums;
+              font-size:16px; font-weight:600; }
+.dim .score small { font-size:10.5px; margin-left:2px; }
+.dim .score.up { color:var(--positive-600); }
+.dim .score.down { color:var(--caution-600); }
+.dim .score.flat { color:var(--ink-400); }
+.dim .why { font-size:12.5px; color:var(--ink-600); }
+.dim .why .rx { display:inline-block; margin-left:8px; padding:2px 9px;
+                border-radius:var(--r-pill); background:var(--teal-50);
+                color:var(--teal-800); font-size:11px; font-weight:600;
+                text-decoration:none; white-space:nowrap; }
+.qrow { display:flex; gap:15px; padding:16px 0;
+        border-top:1px solid var(--border-hair); }
+.qrow:first-of-type { border-top:none; padding-top:0; }
+.qrow .n { font-family:var(--mono); font-size:13px; font-weight:600;
+           color:var(--teal-600); flex:none; width:24px; }
+.qrow .h { font-size:15px; font-weight:600; color:var(--ink-900);
+           margin-bottom:4px; }
+.qrow .r { font-size:13.5px; color:var(--ink-600); line-height:1.5; }
+.qrow .ev { font-family:var(--mono); font-size:11.5px; color:var(--ink-400);
+            margin-top:6px; }
+.ranges { display:flex; gap:8px; flex-wrap:wrap; }
+.ranges a { padding:7px 14px; border-radius:var(--r-pill); font-size:12.5px;
+            font-weight:600; text-decoration:none; color:var(--ink-600);
+            border:1px solid var(--border-hair); background:#fff; }
+.ranges a.on { background:var(--teal-700); color:#fff;
+               border-color:var(--teal-700); }
+.toolmeta { font-family:var(--mono); font-size:11.5px; color:var(--ink-500);
+            margin:2px 0 4px 122px; }
+.rate { display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+        margin-top:16px; padding-top:14px;
+        border-top:1px solid var(--border-hair); }
+.rate .q { font-size:13px; font-weight:600; color:var(--ink-700); }
+.rate a { width:30px; height:30px; display:inline-flex; align-items:center;
+          justify-content:center; border-radius:999px; text-decoration:none;
+          border:1px solid var(--border-hair); background:#fff;
+          font-family:var(--mono); font-size:13px; font-weight:600;
+          color:var(--teal-800); }
+.rate a:hover { background:var(--teal-50); border-color:var(--teal-500); }
+.rate .hint { font-family:var(--mono); font-size:11px; color:var(--ink-400); }
+a.dismiss { float:right; margin-left:12px; padding:3px 12px;
+            border-radius:var(--r-pill); border:1px solid var(--border-hair);
+            background:#fff; font-size:11.5px; font-weight:600;
+            color:var(--ink-500); text-decoration:none; }
+a.dismiss:hover { color:var(--ink-700); border-color:var(--ink-400); }
+.qrow .why { font-size:12.5px; color:var(--ink-500); margin-top:6px;
+             font-style:italic; }
+svg.heatmap { display:block; margin-top:6px; }
+.heatlegend { display:flex; align-items:center; gap:4px; margin-top:8px;
+              font-size:11px; color:var(--ink-500); justify-content:flex-end; }
+.heatlegend i { width:10px; height:10px; border-radius:2px; display:inline-block; }
+.heatlegend span { margin:0 4px; }
+@media (max-width:720px){ .hero,.g-2,.g-3 { grid-template-columns:1fr; }
+  .wow { grid-template-columns:1fr 1fr; }
+  .perf .row { grid-template-columns:96px 1fr 34px 70px; }
+  .dim .row { grid-template-columns:96px 90px 56px 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><span class="mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><rect x="3" y="11.5" width="3" height="5" rx="1" fill="#dbece7"></rect><rect x="9.5" y="8" width="3" height="8.5" rx="1" fill="#82bcae"></rect><rect x="16" y="4.5" width="3" height="12" rx="1" fill="#f3f8f6"></rect></svg></span><span class="brand"><span class="name">practice<b>graph</b></span><span class="sub">Endpoint report - 2026-07-02 (UTC local) - UTC accounting day 2026-07-02</span></span><span class="trust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg> this machine only - nothing sent</span></header>
+<nav class="tabs" aria-label="Report views"><a href="#today">Today</a><a href="#insights">Insights</a><a href="#sources">Sources</a><a href="#skills">Skills</a><a class="privacy" href="#privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Privacy Center</a></nav>
+<main>
+<section class="panel stack" id="today">
+<nav class="ranges" aria-label="Report range"><a class="on" href="#today">Today</a><a href="#range-week">Last 7 days</a><a href="#range-month">Last 30 days</a><a href="#range-all">All time</a></nav>
+<div class="card"><div class="eyebrow">Your quiet hours</div><p>Recorded human AI interactions reached your quiet hours on 0 of 1 observed days.</p><p>2026-06-26 to 2026-07-02; UTC.</p><p class="muted">Background agent activity is excluded. This is not your complete working day.</p></div>
+<details class="card quiet"><summary>Your own reflection</summary><div class="body"><div class="rate"><span class="q">How did today feel?</span><a href="practicegraph:checkin-1">1</a><a href="practicegraph:checkin-2">2</a><a href="practicegraph:checkin-3">3</a><a href="practicegraph:checkin-4">4</a><a href="practicegraph:checkin-5">5</a><span class="hint">1 = rough &middot; 5 = great &middot; one click, local only</span></div></div></details>
+<div class="card"><div class="sec-head"><span class="eyebrow">Usage at listed rates</span><span class="meta">UTC accounting day 2026-07-02</span></div><p class="verdict">$0.04 API-equivalent usage</p><p class="muted">Subscription amounts are comparisons, not charges. Your bill may differ.</p><details class="quiet"><summary>Recorded usage details</summary><div class="body"><p>Includes recorded agent and subagent usage. Activity counts do not establish completed work.</p><p>4 sessions; 9 assistant turns.</p><table class="usage"><thead><tr><th>Tool</th><th>Model</th><th class="n">Turns</th><th class="n">Input</th><th class="n">Cached</th><th class="n">Output</th><th class="n">Cost</th></tr></thead><tbody><tr><td>claude_code</td><td class="model">claude-opus-4-1-20250805</td><td class="n">1</td><td class="n">25</td><td class="n">0</td><td class="n">64</td><td class="n">$0.0052</td></tr><tr><td>claude_code</td><td class="model">claude-sonnet-4-20250514</td><td class="n">6</td><td class="n">1,455</td><td class="n">2,800</td><td class="n">1,375</td><td class="n">$0.0266</td></tr><tr><td>codex</td><td class="model">gpt-5-codex</td><td class="n">2</td><td class="n">1,600</td><td class="n">6,000</td><td class="n">750</td><td class="n">$0.0103</td></tr></tbody></table><p class="muted num" style="font-size:12px;margin:14px 0 0;">tool calls 3 &middot; interruptions 2 &middot; retries 1 &middot; user turns 11</p></div></details></div>
+<div class="card"><div class="eyebrow">Recorded allowance readings</div>
+<p>Codex; 300-minute window: 41% used. Observed 2026-07-02T10:03:00+00:00.</p>
+<p>Recorded reset: 2026-06-21T12:20:00+00:00.</p>
+<p>Codex; 10080-minute window: 4% used. Observed 2026-07-02T10:00:40+00:00.</p>
+<p>Recorded reset: 2026-06-26T18:53:20+00:00.</p>
+<p class="muted">Historical log snapshots; usage may have changed. Reset times appear only when recorded in the source log.</p></div>
+<div class="card"><div class="sec-head"><span class="eyebrow">If you change one thing</span><span class="meta">ranked by estimated impact &middot; market data absent</span></div><div class="sugg"><span class="n">&middot;</span><div><div class="h">No switch is worth making this week — the current routing holds. <span class="tag quiet">wait</span></div><div class="r"><em>Re-checked as new market data and your own numbers land; a decisive gap is the bar.</em><br>9 assistant turns on 1 active day this window; estimated spend $0.04.<br><b>Do:</b> Keep the setup. Nothing to change today.<br><b>How sure:</b> high &mdash; Every routing rule ran against this window and none cleared its threshold, so this is a measured absence rather than an unexamined one. A window this short can still hide a pattern a longer one shows.</div></div></div></div>
+<details class="quiet"><summary><span class="chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span><span class="eyebrow">Source health</span><span style="font-family:var(--mono);font-size:11px;color:var(--ink-400);">2 of 2 local tools parsed</span></summary><div class="body"><div class="srcrow"><span class="nm">claude_code_cli</span><span class="meta">21 records - 16 parsed &middot; parser v10</span><span class="tag emerging">format drift</span></div><div class="srcrow"><span class="nm">codex_cli</span><span class="meta">19 records - 16 parsed &middot; parser v13</span><span class="tag emerging">format drift</span></div><p class="muted" style="font-size:12.5px;margin:10px 0 0;">Some records were not recognized. Parsing continued and skipped them safely; an agent update may be available. No log content was recorded.</p></div></details>
+</section>
+<section class="panel stack" id="insights"><p class="lede">The evidence behind the brief. Every number is computed locally from your own counters &mdash; nothing here was sent anywhere.</p><details class="card quiet"><summary>Accounting details</summary><div class="body"><p>All amounts use listed API rates; subscription amounts are comparisons, not charges. Counts include recorded agent activity.</p><div class="card"><div class="sec-head"><span class="eyebrow">Token mix</span><span class="meta">14.2K total</span></div><div class="mixbar"><span style="width:22%;background:var(--teal-700)"></span><span style="width:62%;background:var(--teal-300)"></span><span style="width:15%;background:var(--teal-500)"></span><span style="width:1%;background:var(--sage-500)"></span></div><div class="mixlegend"><div class="mixrow"><span class="dot" style="background:var(--teal-700)"></span><span class="lab">Input</span><span class="val">3.0K</span><span class="pct">22%</span></div><div class="mixrow"><span class="dot" style="background:var(--teal-300)"></span><span class="lab">Cached</span><span class="val">8.8K</span><span class="pct">62%</span></div><div class="mixrow"><span class="dot" style="background:var(--teal-500)"></span><span class="lab">Output</span><span class="val">2.1K</span><span class="pct">15%</span></div><div class="mixrow"><span class="dot" style="background:var(--sage-500)"></span><span class="lab">Cache write</span><span class="val">200</span><span class="pct">1%</span></div></div><p class="muted" style="font-size:12.5px;margin:14px 0 0;">Cached reads account for most recorded tokens. Providers may bill cached input at a lower rate.</p><p class="muted">Recorded reasoning is already included in output.</p></div><div class="card"><div class="sec-head"><span class="eyebrow">Usage by tool and model</span><span class="meta">assistant turns &middot; est. cost</span></div><table class="usage"><thead><tr><th>Tool</th><th>Model</th><th class="n">Turns</th><th class="n">Input</th><th class="n">Cached</th><th class="n">Output</th><th class="n">Cost</th></tr></thead><tbody><tr><td>claude_code</td><td class="model">claude-opus-4-1-20250805</td><td class="n">1</td><td class="n">25</td><td class="n">0</td><td class="n">64</td><td class="n">$0.0052</td></tr><tr><td>claude_code</td><td class="model">claude-sonnet-4-20250514</td><td class="n">6</td><td class="n">1,455</td><td class="n">2,800</td><td class="n">1,375</td><td class="n">$0.0266</td></tr><tr><td>codex</td><td class="model">gpt-5-codex</td><td class="n">2</td><td class="n">1,600</td><td class="n">6,000</td><td class="n">750</td><td class="n">$0.0103</td></tr></tbody></table><p class="muted num" style="font-size:12px;margin:14px 0 0;">tool calls 3 &middot; interruptions 2 &middot; retries 1 &middot; user turns 11</p></div></div></details><div class="card"><div class="sec-head"><span class="eyebrow">Field guide</span><span class="meta">curated practices &middot; catalog artifact</span></div><div class="sugg"><span class="n">&middot;</span><div><div class="h">Give the first 90 minutes to one task</div><div class="r">Open the day with a single uninterrupted block on the most demanding piece of work - before the first prompt goes anywhere else. A protected first block sets the pace of attention for the whole day.</div></div></div><div class="sugg"><span class="n">&middot;</span><div><div class="h">Work in 90/10 cycles</div><div class="r">Long attention runs in roughly 90-minute waves. Ride one wave, then take a real 10-minute pause away from the screen. Two clean cycles beat five hours of unbroken grinding - the tray timer does the counting for you.</div></div></div><div class="sugg"><span class="n">&middot;</span><div><div class="h">Parallel agents, one task</div><div class="r">Running several agent sessions is fine when they all serve the same task - split one job into parts, not your attention into projects. Cross-project switching is what fragments the day.</div></div></div><div class="sugg"><span class="n">&middot;</span><div><div class="h">Batch small asks into one turn</div><div class="r">Ten rapid-fire prompts cost more attention and more tokens than one well-packed turn. Collect the small questions, send them together, and read the answer properly once.</div></div></div><div class="sugg"><span class="n">&middot;</span><div><div class="h">Sketch the approach before prompting</div><div class="r">A minute spent stating the goal and constraints in your own words makes the prompt tighter, the answer better, and the retry loop shorter. Keep the thinking; delegate the typing.</div></div></div><div class="sugg"><span class="n">&middot;</span><div><div class="h">Continue sessions to reuse cache</div><div class="r">Restarting a session throws the cache away. Continuing one serves repeated context at a tenth of the input price - the single biggest token saver on long tasks.</div></div></div></div><div class="card"><div class="sec-head"><span class="eyebrow">Where your sessions went</span><span class="meta">by work type &middot; structural</span></div><div class="bars"><div class="bar"><span class="lab">Build</span><span class="track"><span class="fill" style="width:33%"></span></span><span class="pct">33%</span></div><div class="bar"><span class="lab">Investigate</span><span class="track"><span class="fill" style="width:33%"></span></span><span class="pct">33%</span></div><div class="bar"><span class="lab">Converse</span><span class="track"><span class="fill" style="width:33%"></span></span><span class="pct">33%</span></div></div><p class="muted" style="font-size:12.5px;margin:14px 0 0;">Classified from event structure only (tool calls, retries, interruptions) - never from content.</p></div></section>
+<section class="panel stack" id="sources"><p class="lede">Which local tools this report was built from. Logs are read from your machine and parsed in place &mdash; raw contents never leave it.</p><div class="card"><div class="srcrow"><span class="nm">claude_code_cli</span><span class="meta">21 records - 16 parsed - 1 malformed - 1 unrecognized - 1 unfamiliar fields &middot; parser v10</span><span class="tag emerging">format drift</span></div><div class="srcrow"><span class="nm">codex_cli</span><span class="meta">19 records - 16 parsed - 1 malformed - 1 unrecognized - 0 unfamiliar fields &middot; parser v13</span><span class="tag emerging">format drift</span></div></div><details class="quiet"><summary><span class="chev"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></span><span class="eyebrow">What a parse reads</span></summary><div class="body"><p class="muted" style="font-size:13px;margin:6px 0 0;">Only closed counters: token totals, model names, timestamps, tool-call and retry counts, and boolean presence flags. Prompt text, code, file paths, and identity are read transiently to count and are never stored or emitted.</p></div></details></section>
+<section class="panel stack" id="skills"><p class="lede">Behavioral maturity signals, computed locally from closed counters &mdash; never compared against other people.</p><div class="card"><div class="chips"><span class="chip"><span class="t">Cache reuse</span><span class="tag leading">leading</span></span><span class="chip"><span class="t">Tool usage</span><span class="tag steady">developing</span></span><span class="chip"><span class="t">Multi-tool breadth</span><span class="tag leading">leading</span></span><span class="chip"><span class="t">Consistency</span><span class="tag emerging">emerging</span></span></div></div></section>
+<section class="panel stack" id="privacy"><div class="card"><div class="privacy-hero"><span class="shield"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span><div><h2 style="margin:0 0 6px;font-size:19px;color:var(--ink-900);">Nothing leaves this machine without your say-so</h2><p class="muted" style="font-size:14px;margin:0;max-width:560px;">Raw prompts, code, file paths, and identity are never emitted. If you opt in, the only thing sent is the closed aggregate counter payload below &mdash; no content, no identity.</p></div></div><div class="pill-row" style="margin-top:18px;"><span class="factpill">content_present = false</span><span class="factpill">identity_present = false</span><span class="factpill">aggregates only</span></div></div><div class="consent off"><span style="font-size:13.5px;">Sharing is <span class="state">OFF (default)</span> &middot; nothing leaves this machine. Opt in with <code>practicegraph consent on</code>.</span></div><div class="card"><div class="sec-head"><span class="eyebrow">Exact payload that would be sent</span><span class="meta">SYNTHETIC EXAMPLE - no emit is queued; values are illustrative</span></div><div class="payload"><pre>{
+  <span class="k">&quot;agent_health&quot;</span>: {
+    <span class="k">&quot;malformed&quot;</span>: 0,
+    <span class="k">&quot;parsed&quot;</span>: 38,
+    <span class="k">&quot;seen&quot;</span>: 40,
+    <span class="k">&quot;skipped&quot;</span>: 2,
+    <span class="k">&quot;sources_detected&quot;</span>: 1,
+    <span class="k">&quot;unknown_field&quot;</span>: 0,
+    <span class="k">&quot;unsupported&quot;</span>: 0
+  },
+  <span class="k">&quot;agent_version&quot;</span>: <span class="s">&quot;0.2.16&quot;</span>,
+  <span class="k">&quot;assistant_turns&quot;</span>: 5,
+  <span class="k">&quot;content_present&quot;</span>: <span class="b">false</span>,
+  <span class="k">&quot;contributors&quot;</span>: 1,
+  <span class="k">&quot;day&quot;</span>: <span class="s">&quot;1970-01-01&quot;</span>,
+  <span class="k">&quot;emit_id&quot;</span>: <span class="s">&quot;00000000-0000-4000-8000-000000000000&quot;</span>,
+  <span class="k">&quot;engagement&quot;</span>: {
+    <span class="k">&quot;engagement_unavailable&quot;</span>: 0,
+    <span class="k">&quot;recommendation_dismissed&quot;</span>: 0,
+    <span class="k">&quot;recommendation_never_suggest&quot;</span>: 0,
+    <span class="k">&quot;report_generated&quot;</span>: 1,
+    <span class="k">&quot;tip_acted&quot;</span>: 0,
+    <span class="k">&quot;tip_shown&quot;</span>: 0
+  },
+  <span class="k">&quot;estimated_cost_micro_usd&quot;</span>: 12500,
+  <span class="k">&quot;identity_present&quot;</span>: <span class="b">false</span>,
+  <span class="k">&quot;interruptions&quot;</span>: 1,
+  <span class="k">&quot;is_estimate&quot;</span>: <span class="b">true</span>,
+  <span class="k">&quot;maturity&quot;</span>: {
+    <span class="k">&quot;cache_reuse&quot;</span>: <span class="s">&quot;developing&quot;</span>,
+    <span class="k">&quot;consistency&quot;</span>: <span class="s">&quot;emerging&quot;</span>,
+    <span class="k">&quot;multi_tool&quot;</span>: <span class="s">&quot;emerging&quot;</span>,
+    <span class="k">&quot;tool_usage&quot;</span>: <span class="s">&quot;emerging&quot;</span>
+  },
+  <span class="k">&quot;org_id&quot;</span>: <span class="s">&quot;example-org&quot;</span>,
+  <span class="k">&quot;platform&quot;</span>: <span class="s">&quot;windows&quot;</span>,
+  <span class="k">&quot;rate_card_version&quot;</span>: <span class="s">&quot;bundled-2026-07-25&quot;</span>,
+  <span class="k">&quot;retries&quot;</span>: 0,
+  <span class="k">&quot;schema_version&quot;</span>: 2,
+  <span class="k">&quot;sessions&quot;</span>: 2,
+  <span class="k">&quot;spend_by_family&quot;</span>: {
+    <span class="k">&quot;claude_sonnet&quot;</span>: 12500
+  },
+  <span class="k">&quot;tokens&quot;</span>: {
+    <span class="k">&quot;cache_creation&quot;</span>: 0,
+    <span class="k">&quot;cached&quot;</span>: 4000,
+    <span class="k">&quot;input&quot;</span>: 1000,
+    <span class="k">&quot;output&quot;</span>: 500,
+    <span class="k">&quot;reasoning&quot;</span>: 100
+  },
+  <span class="k">&quot;tool_calls&quot;</span>: 3,
+  <span class="k">&quot;tools_observed&quot;</span>: [
+    &quot;claude_code&quot;
+  ],
+  <span class="k">&quot;unpriced_turns&quot;</span>: 0,
+  <span class="k">&quot;user_turns&quot;</span>: 4,
+  <span class="k">&quot;work_type_sessions&quot;</span>: {
+    <span class="k">&quot;build&quot;</span>: 1,
+    <span class="k">&quot;converse&quot;</span>: 1,
+    <span class="k">&quot;investigate&quot;</span>: 0,
+    <span class="k">&quot;unknown&quot;</span>: 0
+  }
+}</pre></div><p class="muted" style="font-size:12.5px;margin:14px 0 0;">This is the literal JSON &mdash; there is no hidden field. The schema is closed: anything else is rejected by the server.</p></div><div class="card"><div class="sec-head"><span class="eyebrow">Emit queue</span><span class="meta">local until sent</span></div><div class="qstats"><div class="kpi"><div class="k">0</div><div class="l">pending</div></div><div class="kpi"><div class="k">0</div><div class="l">retry_wait</div></div><div class="kpi"><div class="k">0</div><div class="l">sent</div></div><div class="kpi"><div class="k">0</div><div class="l">dead_letter</div></div></div><p class="muted" style="font-size:12.5px;margin:12px 0 0;">Destination endpoint: not configured &middot; organization id: not configured</p></div><div class="card"><div class="sec-head"><span class="eyebrow">Change this from the command line</span></div><ul class="cmds"><li><code>practicegraph consent status</code> &mdash; current state</li><li><code>practicegraph consent show</code> &mdash; the exact sharing boundary</li><li><code>practicegraph consent on</code> / <code>practicegraph consent off</code> &mdash; change it any time</li></ul><p class="muted" style="font-size:12.5px;margin:14px 0 0;">This page is a static report: it never changes settings.</p></div></section>
+<section class="panel stack" id="range-week"><nav class="ranges" aria-label="Report range"><a href="#today">Today</a><a class="on" href="#range-week">Last 7 days</a><a href="#range-month">Last 30 days</a><a href="#range-all">All time</a></nav><div class="card"><div class="sec-head"><span class="eyebrow">API-equivalent usage &middot; Last 7 days</span><span class="meta">2026-06-26 &rarr; 2026-07-02 (UTC)</span></div><div class="figure" style="font-family:var(--mono);font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1;">$0.04<span class="est">estimate</span></div><p class="muted">At listed API rates. Subscription amounts are comparisons, not charges. Your bill may differ.</p><details class="quiet"><summary>Usage details for this period</summary><div class="herokpis" style="margin-top:18px;"><div class="kpi"><div class="k">14.2K</div><div class="l">tokens</div></div><div class="kpi"><div class="k">9</div><div class="l">assistant turns</div></div><div class="kpi"><div class="k">1</div><div class="l">active days</div></div></div><div style="margin-top:18px;"><svg width="100%" height="66" viewBox="0 0 620 66" preserveAspectRatio="none" role="img" aria-label="estimated spend per period"><rect x="0" y="47" width="83" height="1" rx="1" fill="#e5ddcd"><title>2026-06-26: $0.00</title></rect><text x="0" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">26</text><rect x="88" y="47" width="83" height="1" rx="1" fill="#e5ddcd"><title>2026-06-27: $0.00</title></rect><text x="88" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">27</text><rect x="176" y="47" width="83" height="1" rx="1" fill="#e5ddcd"><title>2026-06-28: $0.00</title></rect><text x="176" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">28</text><rect x="264" y="47" width="83" height="1" rx="1" fill="#e5ddcd"><title>2026-06-29: $0.00</title></rect><text x="264" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">29</text><rect x="352" y="47" width="83" height="1" rx="1" fill="#e5ddcd"><title>2026-06-30: $0.00</title></rect><text x="352" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">30</text><rect x="440" y="47" width="83" height="1" rx="1" fill="#e5ddcd"><title>2026-07-01: $0.00</title></rect><text x="440" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">01</text><rect x="528" y="4" width="83" height="44" rx="1" fill="#2f8576"><title>2026-07-02: $0.04</title></rect><text x="528" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">02</text></svg></div></details></div><div class="card"><div class="sec-head"><span class="eyebrow">By tool</span><span class="meta">share of est. spend</span></div><div class="bars"><div class="bar"><span class="lab">claude_code</span><span class="track"><span class="fill" style="width:76%"></span></span><span class="pct">76%</span></div><div class="toolmeta">$0.03 &middot; 7 turns &middot; 5.9K tokens &middot; top model claude-sonnet-4-20250514 &middot; last active 2026-07-02</div><div class="bar"><span class="lab">codex</span><span class="track"><span class="fill" style="width:24%"></span></span><span class="pct">24%</span></div><div class="toolmeta">$0.01 &middot; 2 turns &middot; 8.3K tokens &middot; top model gpt-5-codex &middot; last active 2026-07-02</div></div></div><div class="card"><div class="sec-head"><span class="eyebrow">Top models</span><span class="meta">by est. cost</span></div><table class="usage"><thead><tr><th>Tool</th><th>Model</th><th class="n">Turns</th><th class="n">Tokens</th><th class="n">Cost</th></tr></thead><tbody><tr><td>claude_code</td><td class="model">claude-sonnet-4-20250514</td><td class="n">6</td><td class="n">5.8K</td><td class="n">$0.03</td></tr><tr><td>codex</td><td class="model">gpt-5-codex</td><td class="n">2</td><td class="n">8.3K</td><td class="n">$0.01</td></tr><tr><td>claude_code</td><td class="model">claude-opus-4-1-20250805</td><td class="n">1</td><td class="n">89</td><td class="n">$0.01</td></tr></tbody></table></div></section>
+<section class="panel stack" id="range-month"><nav class="ranges" aria-label="Report range"><a href="#today">Today</a><a href="#range-week">Last 7 days</a><a class="on" href="#range-month">Last 30 days</a><a href="#range-all">All time</a></nav><div class="card"><div class="sec-head"><span class="eyebrow">API-equivalent usage &middot; Last 30 days</span><span class="meta">2026-06-03 &rarr; 2026-07-02 (UTC)</span></div><div class="figure" style="font-family:var(--mono);font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1;">$0.04<span class="est">estimate</span></div><p class="muted">At listed API rates. Subscription amounts are comparisons, not charges. Your bill may differ.</p><details class="quiet"><summary>Usage details for this period</summary><div class="herokpis" style="margin-top:18px;"><div class="kpi"><div class="k">14.2K</div><div class="l">tokens</div></div><div class="kpi"><div class="k">9</div><div class="l">assistant turns</div></div><div class="kpi"><div class="k">1</div><div class="l">active days</div></div></div><div style="margin-top:18px;"><svg width="100%" height="66" viewBox="0 0 620 66" preserveAspectRatio="none" role="img" aria-label="estimated spend per period"><rect x="0" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-03: $0.00</title></rect><text x="0" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">03</text><rect x="20" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-04: $0.00</title></rect><rect x="40" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-05: $0.00</title></rect><rect x="60" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-06: $0.00</title></rect><rect x="80" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-07: $0.00</title></rect><rect x="100" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-08: $0.00</title></rect><rect x="120" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-09: $0.00</title></rect><rect x="140" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-10: $0.00</title></rect><text x="140" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">10</text><rect x="160" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-11: $0.00</title></rect><rect x="180" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-12: $0.00</title></rect><rect x="200" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-13: $0.00</title></rect><rect x="220" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-14: $0.00</title></rect><rect x="240" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-15: $0.00</title></rect><rect x="260" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-16: $0.00</title></rect><rect x="280" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-17: $0.00</title></rect><text x="280" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">17</text><rect x="300" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-18: $0.00</title></rect><rect x="320" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-19: $0.00</title></rect><rect x="340" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-20: $0.00</title></rect><rect x="360" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-21: $0.00</title></rect><rect x="380" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-22: $0.00</title></rect><rect x="400" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-23: $0.00</title></rect><rect x="420" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-24: $0.00</title></rect><text x="420" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">24</text><rect x="440" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-25: $0.00</title></rect><rect x="460" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-26: $0.00</title></rect><rect x="480" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-27: $0.00</title></rect><rect x="500" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-28: $0.00</title></rect><rect x="520" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-29: $0.00</title></rect><rect x="540" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-06-30: $0.00</title></rect><rect x="560" y="47" width="18" height="1" rx="1" fill="#e5ddcd"><title>2026-07-01: $0.00</title></rect><text x="560" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">01</text><rect x="580" y="4" width="18" height="44" rx="1" fill="#2f8576"><title>2026-07-02: $0.04</title></rect><text x="580" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">02</text></svg></div></details></div><div class="card"><div class="sec-head"><span class="eyebrow">By tool</span><span class="meta">share of est. spend</span></div><div class="bars"><div class="bar"><span class="lab">claude_code</span><span class="track"><span class="fill" style="width:76%"></span></span><span class="pct">76%</span></div><div class="toolmeta">$0.03 &middot; 7 turns &middot; 5.9K tokens &middot; top model claude-sonnet-4-20250514 &middot; last active 2026-07-02</div><div class="bar"><span class="lab">codex</span><span class="track"><span class="fill" style="width:24%"></span></span><span class="pct">24%</span></div><div class="toolmeta">$0.01 &middot; 2 turns &middot; 8.3K tokens &middot; top model gpt-5-codex &middot; last active 2026-07-02</div></div></div><div class="card"><div class="sec-head"><span class="eyebrow">Top models</span><span class="meta">by est. cost</span></div><table class="usage"><thead><tr><th>Tool</th><th>Model</th><th class="n">Turns</th><th class="n">Tokens</th><th class="n">Cost</th></tr></thead><tbody><tr><td>claude_code</td><td class="model">claude-sonnet-4-20250514</td><td class="n">6</td><td class="n">5.8K</td><td class="n">$0.03</td></tr><tr><td>codex</td><td class="model">gpt-5-codex</td><td class="n">2</td><td class="n">8.3K</td><td class="n">$0.01</td></tr><tr><td>claude_code</td><td class="model">claude-opus-4-1-20250805</td><td class="n">1</td><td class="n">89</td><td class="n">$0.01</td></tr></tbody></table></div></section>
+<section class="panel stack" id="range-all"><nav class="ranges" aria-label="Report range"><a href="#today">Today</a><a href="#range-week">Last 7 days</a><a href="#range-month">Last 30 days</a><a class="on" href="#range-all">All time</a></nav><div class="card"><div class="sec-head"><span class="eyebrow">API-equivalent usage &middot; All time</span><span class="meta">2026-07-02 &rarr; 2026-07-02 (UTC)</span></div><div class="figure" style="font-family:var(--mono);font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1;">$0.04<span class="est">estimate</span></div><p class="muted">At listed API rates. Subscription amounts are comparisons, not charges. Your bill may differ.</p><details class="quiet"><summary>Usage details for this period</summary><div class="herokpis" style="margin-top:18px;"><div class="kpi"><div class="k">14.2K</div><div class="l">tokens</div></div><div class="kpi"><div class="k">9</div><div class="l">assistant turns</div></div><div class="kpi"><div class="k">1</div><div class="l">active days</div></div></div><div style="margin-top:18px;"><svg width="100%" height="66" viewBox="0 0 620 66" preserveAspectRatio="none" role="img" aria-label="estimated spend per period"><rect x="0" y="4" width="615" height="44" rx="1" fill="#2f8576"><title>2026-07: $0.04</title></rect><text x="0" y="62" style="font:8.5px var(--mono);fill:var(--ink-400);">Jul 26</text></svg></div></details></div><div class="card"><div class="sec-head"><span class="eyebrow">By tool</span><span class="meta">share of est. spend</span></div><div class="bars"><div class="bar"><span class="lab">claude_code</span><span class="track"><span class="fill" style="width:76%"></span></span><span class="pct">76%</span></div><div class="toolmeta">$0.03 &middot; 7 turns &middot; 5.9K tokens &middot; top model claude-sonnet-4-20250514 &middot; last active 2026-07-02</div><div class="bar"><span class="lab">codex</span><span class="track"><span class="fill" style="width:24%"></span></span><span class="pct">24%</span></div><div class="toolmeta">$0.01 &middot; 2 turns &middot; 8.3K tokens &middot; top model gpt-5-codex &middot; last active 2026-07-02</div></div></div><div class="card"><div class="sec-head"><span class="eyebrow">Top models</span><span class="meta">by est. cost</span></div><table class="usage"><thead><tr><th>Tool</th><th>Model</th><th class="n">Turns</th><th class="n">Tokens</th><th class="n">Cost</th></tr></thead><tbody><tr><td>claude_code</td><td class="model">claude-sonnet-4-20250514</td><td class="n">6</td><td class="n">5.8K</td><td class="n">$0.03</td></tr><tr><td>codex</td><td class="model">gpt-5-codex</td><td class="n">2</td><td class="n">8.3K</td><td class="n">$0.01</td></tr><tr><td>claude_code</td><td class="model">claude-opus-4-1-20250805</td><td class="n">1</td><td class="n">89</td><td class="n">$0.01</td></tr></tbody></table></div></section>
+</main>
+<div class="foot"><span>practicegraph &middot; endpoint report &middot; generated 2026-07-02 18:00 UTC</span><span>estimates &middot; rate card bundled-2026-07-25 &middot; v0.2.16</span></div>
+</div>
+</body>
+</html>

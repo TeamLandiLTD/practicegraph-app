@@ -1,0 +1,215 @@
+# Public contributions run only on disposable GitHub-hosted runners.
+# Native Windows packaging uses a maintainer-dispatched self-hosted job.
+# See https://docs.github.com/en/actions/reference/security/secure-use
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14.7"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - name: Install development dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Lint
+        run: python -m ruff check src tests
+      - name: Types
+        run: python -m mypy
+      - name: Tests (fixtures, privacy, integration)
+        run: python -m pytest
+      - name: Frontend tests and production build
+        working-directory: ui
+        run: |
+          npm ci
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm audit --audit-level=moderate
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm run build
+      - name: Audit source export inventory
+        run: python tools/public_source.py --check
+      - name: Audit Python dependencies
+        run: |
+          python -m pip install pip-audit
+          python -m pip freeze --exclude-editable > ci-env-requirements.txt
+          python -m pip_audit --strict --progress-spinner off -r ci-env-requirements.txt
+      - name: Audit shipped Python pins
+        run: python -m pip_audit --strict --progress-spinner off -r packaging/shipped-requirements.txt
+
+  # Maintainer-only native build, exact payload verification and personal runtime smoke.
+  native-windows:
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'TeamLandiLTD/Practice-graph'
+    runs-on: [self-hosted, windows]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      # Put Git's bin first on PATH so `bash` resolves to Git bash, not the WSL
+      # launcher in System32 (which fails the rust-toolchain action's POSIX
+      # scripts). GITHUB_PATH prepends for every later step in the job.
+      - name: Prefer Git bash over WSL
+        shell: powershell
+        run: |
+          $gitBin = "$env:ProgramFiles\Git\bin"
+          if (-not (Test-Path "$gitBin\bash.exe")) { throw "Git bash not found at $gitBin" }
+          Add-Content -Path $env:GITHUB_PATH -Value $gitBin
+          $mingwBin = $env:MINGW_BIN
+          if (-not $mingwBin) { throw "Set MINGW_BIN to the runner's full MinGW bin directory" }
+          if (-not (Test-Path "$mingwBin\gcc.exe")) { throw "Configured MinGW toolchain is missing" }
+          Add-Content -Path $env:GITHUB_PATH -Value $mingwBin
+      # The full GNU compiler/binutils directory must be configured on PATH.
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable-x86_64-pc-windows-gnu
+      - name: Install WiX (pinned, pre-OSMF)
+        # Idempotent: on a persistent self-hosted runner wix is already global,
+        # so `install` would fail — update to (or confirm) the pinned version.
+        shell: powershell
+        run: |
+          $have = (dotnet tool list --global | Select-String -SimpleMatch 'wix ')
+          if ($have) { dotnet tool update --global wix --version 5.0.2 }
+          else       { dotnet tool install --global wix --version 5.0.2 }
+      - name: Shell build
+        shell: powershell
+        working-directory: shell
+        run: cargo +stable-gnu build --release
+      - name: Shell tests
+        shell: powershell
+        working-directory: shell
+        run: cargo +stable-gnu test --release
+      - name: Shell lint
+        shell: powershell
+        working-directory: shell
+        run: cargo +stable-gnu clippy --release -- -D warnings
+      # 281 crates end up compiled into an exe we sign and ship. cargo-deny
+      # checks advisories, and also that every one of them carries a licence
+      # we are allowed to redistribute - the second failure mode is quieter
+      # than a CVE and just as expensive.
+      - name: Audit Rust dependencies
+        working-directory: shell
+        shell: powershell
+        run: |
+          cargo +stable-gnu --config .cargo/config.toml install cargo-deny --locked
+          cargo +stable-gnu deny --target x86_64-pc-windows-gnu check advisories bans licenses sources
+      - name: Build bundle + MSI (ICE-validated)
+        shell: powershell
+        # -RustToolchain stable-gnu (NOT bare "stable", which is the MSVC
+        # default and fails with "link.exe not found" — no Visual C++ on the
+        # runner). Matches the script's own default and the shell-build steps.
+        run: powershell -ExecutionPolicy Bypass -File packaging/build_workstation.ps1 -Msi -RustToolchain stable-gnu
+  # Native candidates are built and tested on disposable hosted runners.
+  native-macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14.7"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install reviewed build dependencies
+        run: python -m pip install -e ".[dev]" -r packaging/posix-build-requirements.txt
+      - name: Verify portable core and shell policy
+        run: |
+          python -m pytest tests/test_schedule.py tests/test_security_regressions.py
+          cd macos && swift test
+      - name: Build app and disk image (ad-hoc signed candidate)
+        run: bash packaging/macos/build_macos.sh --dmg
+      - name: Exercise the packaged engine
+        run: python packaging/smoke_desktop.py --engine dist/macos/PracticeGraph.app/Contents/Resources/practicegraph-engine
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PracticeGraph-${{ matrix.os }}-candidate
+          path: |
+            dist/macos/*.dmg
+            dist/macos/*.sha256
+            dist/macos/PracticeGraph.app/Contents/Resources/BUILD-INFO.json
+          if-no-files-found: error
+          retention-days: 14
+
+  native-linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14.7"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install desktop test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 xvfb dbus-x11 desktop-file-utils
+          python -m pip install -e ".[dev]" -r packaging/posix-build-requirements.txt
+      - name: Verify Linux boundaries
+        run: python -m pytest tests/test_linux_desktop.py tests/test_schedule.py tests/test_security_regressions.py
+      - name: Build native Linux packages
+        run: bash packaging/linux/build_linux.sh
+      - name: Install and exercise the packaged app
+        run: |
+          sudo dpkg -i dist/linux/*.deb
+          desktop-file-validate /usr/share/applications/practicegraph.desktop
+          python packaging/smoke_desktop.py --engine /opt/practicegraph/engine/practicegraph-engine
+          dbus-run-session -- xvfb-run -a /usr/bin/python3 packaging/linux/smoke_gtk.py /opt/practicegraph/practicegraph_desktop.py
+          sudo dpkg -r practicegraph
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PracticeGraph-linux-amd64-candidate
+          path: dist/linux/*
+          if-no-files-found: error
+          retention-days: 14
+
+  posix-privacy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14.7"
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest tests/test_security_regressions.py tests/test_nethttp.py tests/test_pin_model.py
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build and verify server image
+        run: |
+          docker build -t practicegraph-check .
+          docker run --rm --entrypoint python practicegraph-check -c 'import os, pathlib, practicegraph_server; assert os.getuid() == 10001; assert pathlib.Path("LICENSE").stat().st_size > 0; assert pathlib.Path("NOTICE").stat().st_size > 0'

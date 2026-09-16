@@ -1,0 +1,25 @@
+{
+  "name": "practicegraph-ui",
+  "private": true,
+  "version": "0.2.16",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@vitejs/plugin-react": "^6.0.3",
+    "jsdom": "^25.0.1",
+    "vite": "^8.1.4",
+    "vitest": "^4.1.11"
+  },
+  "license": "Apache-2.0"
+}

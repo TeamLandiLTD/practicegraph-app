@@ -1,0 +1,58 @@
+# Golden files and parser fixtures are byte-exact test artifacts (FR-RPT-3,
+# FR-SRC-8). Never let git translate their line endings.
+tests/goldens/** -text
+tests/fixtures/** -text
+
+# Shell scripts and macOS sources MUST stay LF even when checked out on
+# Windows — a CRLF shebang breaks bash on the Mac ("bash\r: bad interpreter"),
+# and Swift/plist tooling expects Unix newlines. Force LF regardless of the
+# committer's core.autocrlf.
+*.sh text eol=lf
+*.swift text eol=lf
+*.plist text eol=lf
+*.entitlements text eol=lf
+macos/** text eol=lf
+packaging/macos/** text eol=lf
+linux/** text eol=lf
+packaging/linux/** text eol=lf
+
+# Web assets must stay LF so Vite builds are byte-reproducible on Windows.
+ui/index.html text eol=lf
+webui/index.html text eol=lf
+
+# New source exports omit private planning and authoring inputs. This does not
+# remove those files from old Git history; do not publish the private history.
+drafts/** export-ignore
+tools/*_draft.json export-ignore
+tools/*_candidates.json export-ignore
+.agents/skills/*/drafts/** export-ignore
+.agents/skills/*/rejected/** export-ignore
+.agents/skills/** export-ignore
+.claude/skills/** export-ignore
+docs/ASSESSMENT_*.md export-ignore
+docs/PRODUCT_DIRECTION_PLAN_*.md export-ignore
+docs/IMPLEMENTATION_*.md export-ignore
+docs/MARKETING_PLAN.md export-ignore
+
+# Public documentation is an explicit set; private research/planning stays here.
+/docs/** export-ignore
+"science investigation.md" export-ignore
+/docs/CODE_SIGNING.md -export-ignore
+/docs/COPY_RULES.md -export-ignore
+/docs/EDITORIAL_WORKFLOWS.md -export-ignore
+/docs/HOSTED_CONTENT.md -export-ignore
+/docs/MACOS_BUILD.md -export-ignore
+/docs/OPEN_SOURCE_RELEASE.md -export-ignore
+/docs/RELEASING.md -export-ignore
+/docs/SERVER_OPS.md -export-ignore
+/docs/SKILL_CATALOG.md -export-ignore
+/docs/SUPPLY_CHAIN.md -export-ignore
+/docs/SECURITY_REMEDIATION.md -export-ignore
+/docs/CATALOG_ENCRYPTION.md -export-ignore
+/docs/TRAINING.md -export-ignore
+/docs/HARNESS_PLAYBOOKS.md -export-ignore
+/docs/PRACTICE_TIME.md -export-ignore
+/docs/SETUP_IMPROVEMENTS_PLAN.md -export-ignore
+
+# Retain verbatim upstream notice files, including original whitespace.
+packaging/third-party/*.txt -text -whitespace

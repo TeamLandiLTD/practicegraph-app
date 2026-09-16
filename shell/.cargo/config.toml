@@ -1,0 +1,2 @@
+# GNU builds require a complete MinGW bin directory on PATH (dlltool and as).
+# No maintainer-machine paths are embedded here. See CONTRIBUTING.md.

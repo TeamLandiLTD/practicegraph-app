@@ -1,0 +1,28 @@
+# The ONLY third-party Python that ships inside the agent.
+#
+# --require-hashes turns a version pin into an artifact pin. A version
+# alone still trusts whatever PyPI serves under that name today; these
+# hashes were taken from the artifacts on 2026-07-26 and a substituted or
+# re-uploaded wheel now fails the install rather than landing inside a
+# process that reads someone's logs.
+#
+# tzdata is pure data (zoneinfo tables, no executable code). tzlocal is
+# five files and we call exactly one function from it - see
+# docs/PER_USER_INSTALL_PLAN.md for the plan to vendor it away entirely.
+#
+# Regenerate:  pip download --no-deps -d <dir> <pins>  then sha256 each file.
+
+tzdata==2026.2 \
+    --hash=sha256:bbe9af844f658da81a5f95019480da3a89415801f6cc966806612cc7169bffe7
+tzlocal==5.4.4 \
+    --hash=sha256:aae09f0126a8a86fa736be266eb4a471380d26a0de3bc14844e7821fee3e2a15
+
+# Encrypted catalog transport. Windows release runtime is CPython 3.14;
+# the build explicitly targets that interpreter rather than the build host ABI.
+# Reader keys are public scraping deterrence; publisher signing seeds never ship.
+cryptography==50.0.1 \
+    --hash=sha256:aed8db4f6d71c51efb89530e12d9464e7bf2923d46c3205dc794a2a93f8c0648
+cffi==2.1.0 \
+    --hash=sha256:1b96bfe2c4bd825681b7d311ad6d9b7280a091f43e8f63da5729638083cd3bfb
+pycparser==3.0 \
+    --hash=sha256:b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992

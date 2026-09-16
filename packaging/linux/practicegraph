@@ -1,0 +1,5 @@
+#!/bin/sh
+# Resolve the installed launcher without relying on the caller's working directory.
+set -eu
+PG_ROOT=$(CDPATH= cd -- "$(dirname -- "$(readlink -f -- "$0")")" && pwd)
+exec /usr/bin/python3 "$PG_ROOT/practicegraph_desktop.py" "$@"

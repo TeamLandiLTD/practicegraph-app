@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "practicegraph"
+version = "0.2.16"
+description = "Privacy-preserving AI-usage maturity agent: all analysis happens on the endpoint."
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.12"
+# Local-day correctness on Windows requires first-party IANA data plus a
+# Windows/Unix local-zone resolver. Both are pinned and frozen into releases.
+dependencies = [
+    "tzdata==2026.2",
+    "tzlocal==5.4.4",
+    "cryptography==50.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "mypy>=1.10",
+    "ruff>=0.5",
+    # cryptography is now a pinned runtime dependency for encrypted catalogs.
+    # Curator tooling (tools/) reads skill YAML in its tests; dev-only.
+    "pyyaml>=6",
+]
+
+[project.scripts]
+practicegraph = "practicegraph.cli:entry"
+practicegraph-server = "practicegraph_server.__main__:entry"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+practicegraph = ["py.typed"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src/practicegraph", "src/practicegraph_server"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
