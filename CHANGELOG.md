@@ -2,6 +2,10 @@
 
 Every build is its own version; a version number is never rebuilt or reused. Windows installers, their SBOMs and the signed update manifests are attached to the [Releases](https://github.com/TeamLandiLTD/practicegraph-app/releases) page, which is the complete ledger.
 
+## 0.2.17 — 2026-09-16
+
+- Editions are pulled from practicegraph.dev, the product's own domain, instead of the preview host. Every channel derives from one content base URL, so they switched together; verified with a fresh profile across all fourteen public channels.
+
 ## 0.2.16 — 2026-09-16
 
 - A rendering failure now shows a card with the error, its stack and a reload button instead of an empty window, and records the error locally under `pg-last-error` for the report.
