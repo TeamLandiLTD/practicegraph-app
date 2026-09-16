@@ -14,6 +14,7 @@ from pathlib import Path
 import pytest
 
 import practicegraph.catalog as catalog_module
+from conftest import sealed
 from practicegraph.analysis.ratecard import (
     BUNDLED_RATE_CARD,
     activate_rate_card_from,
@@ -257,7 +258,7 @@ def test_public_news_pull_is_validated_and_cached_for_fifteen_minutes(
 
     def response(url: str, timeout_s: float = 10.0, **_kwargs) -> dict[str, object]:
         calls.append(url)
-        return _news_artifact()
+        return sealed("news", _news_artifact())
 
     monkeypatch.setattr(catalog_module, "_get_json", response)
 
@@ -283,7 +284,7 @@ def test_public_news_with_enterprise_needs_an_explicit_choice(
     store = _store(tmp_path)
     config = _config(tmp_path, "https://enterprise.example")
     monkeypatch.setattr(
-        catalog_module, "_get_json", lambda *_args, **_kwargs: _news_artifact()
+        catalog_module, "_get_json", lambda *_args, **_kwargs: sealed("news", _news_artifact())
     )
 
     # An EXPLICITLY configured news URL (config file / env): the pull stands.
@@ -315,6 +316,28 @@ def test_public_news_rejects_plaintext(tmp_path: Path) -> None:
     assert pull_public_news(store, plaintext, NOW) == "invalid_artifact"
 
 
+def test_public_pull_rejects_an_unsigned_edition(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A valid but unsigned document must never be accepted from a public host:
+    the publisher signature, not TLS to the host, is the trust anchor for
+    served prompts, playbooks and model pins (open-source readiness review,
+    2026-09-16). Nothing reaches disk and the cache day stays unclaimed."""
+    store = _store(tmp_path)
+    config = _config(tmp_path, None)
+    monkeypatch.setattr(catalog_module, "_get_json", lambda *_args, **_kwargs: _news_artifact())
+    assert pull_public_news(store, config, NOW) == "invalid_artifact"
+    assert not (tmp_path / "data" / "catalog" / "news.json").exists()
+    monkeypatch.setattr(
+        catalog_module, "_get_json", lambda *_args, **_kwargs: skills_artifact()
+    )
+    skills = dataclasses.replace(
+        _config(tmp_path, None), skills_source_url=TEAMLANDI_SKILLS_URL
+    )
+    assert pull_public_skills(store, skills, NOW) == "invalid_artifact"
+    assert not (tmp_path / "data" / "catalog" / "skills.json").exists()
+
+
 def test_invalid_public_news_preserves_last_valid_cache(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -343,7 +366,7 @@ def test_public_models_pull_is_validated_cached_and_daily(
 
     def response(url: str, timeout_s: float = 10.0, **_kwargs) -> dict[str, object]:
         calls.append(url)
-        return _models_artifact()
+        return sealed("models", _models_artifact())
 
     monkeypatch.setattr(catalog_module, "_get_json", response)
 
@@ -399,7 +422,9 @@ def test_public_pull_records_exact_accepted_source(
         skills_source_url=TEAMLANDI_SKILLS_URL,
         skills_source_url_source="default",
     )
-    monkeypatch.setattr(catalog_module, "_get_json", lambda *_args, **_kwargs: skills_artifact())
+    monkeypatch.setattr(
+        catalog_module, "_get_json", lambda *_args, **_kwargs: sealed("skills", skills_artifact())
+    )
     assert pull_public_skills(store, config, NOW) == "pulled"
     assert active_skills_source(config.data_dir, store) == "teamlandi_public"
     monkeypatch.setattr(
@@ -463,7 +488,7 @@ def test_enterprise_config_fails_closed_after_refresh_failure(
         public_fetches.append(url)
         public_skills = skills_artifact()
         public_skills["skills_version"] = "public-v1"
-        return public_skills
+        return sealed("skills", public_skills)
 
     monkeypatch.setattr(catalog_module, "_get_json", public_response)
     assert pull_public_skills(store, config, next_day) == (
@@ -485,7 +510,9 @@ def test_public_replacement_interruption_invalidates_previous_source(
     )
     first = skills_artifact()
     first["skills_version"] = "public-v1"
-    monkeypatch.setattr(catalog_module, "_get_json", lambda *_args, **_kwargs: first)
+    monkeypatch.setattr(
+        catalog_module, "_get_json", lambda *_args, **_kwargs: sealed("skills", first)
+    )
     assert pull_public_skills(store, config, NOW) == "pulled"
     skills_path = config.data_dir / "catalog" / "skills.json"
     accepted_bytes = skills_path.read_bytes()
@@ -493,7 +520,9 @@ def test_public_replacement_interruption_invalidates_previous_source(
 
     second = skills_artifact()
     second["skills_version"] = "public-v2"
-    monkeypatch.setattr(catalog_module, "_get_json", lambda *_args, **_kwargs: second)
+    monkeypatch.setattr(
+        catalog_module, "_get_json", lambda *_args, **_kwargs: sealed("skills", second)
+    )
     source_during_write: list[str] = []
 
     def interrupt_write(target: Path, artifact: dict[str, object]) -> None:
@@ -603,7 +632,9 @@ def test_custom_and_enterprise_sources_are_not_trusted_for_install(
         skills_source_url="https://example.test/skills.json",
         skills_source_url_source="env",
     )
-    monkeypatch.setattr(catalog_module, "_get_json", lambda *_args, **_kwargs: skills_artifact())
+    monkeypatch.setattr(
+        catalog_module, "_get_json", lambda *_args, **_kwargs: sealed("skills", skills_artifact())
+    )
     assert pull_public_skills(store, custom, NOW) == "pulled"
     assert active_skills_source(custom.data_dir, store) == "custom_public"
 
@@ -644,7 +675,9 @@ def test_invalid_local_artifact_reports_bundled_even_with_stale_trusted_meta(
     config = dataclasses.replace(
         _config(tmp_path, None), skills_source_url=TEAMLANDI_SKILLS_URL
     )
-    monkeypatch.setattr(catalog_module, "_get_json", lambda *_args, **_kwargs: skills_artifact())
+    monkeypatch.setattr(
+        catalog_module, "_get_json", lambda *_args, **_kwargs: sealed("skills", skills_artifact())
+    )
     assert pull_public_skills(store, config, NOW) == "pulled"
     (config.data_dir / "catalog" / "skills.json").write_text(
         "broken", encoding="utf-8"
@@ -691,7 +724,7 @@ def test_public_advisor_pull_is_validated_cached_and_daily(
 
     def response(url: str, timeout_s: float = 10.0, **_kwargs) -> dict[str, object]:
         calls.append(url)
-        return _advisor_artifact()
+        return sealed("advisor", _advisor_artifact())
 
     monkeypatch.setattr(catalog_module, "_get_json", response)
 
@@ -756,7 +789,7 @@ def test_public_ratecard_pull_is_validated_cached_and_daily(
 
     def response(url: str, timeout_s: float = 10.0, **_kwargs) -> dict[str, object]:
         calls.append(url)
-        return _ratecard_artifact()
+        return sealed("rate-card", _ratecard_artifact())
 
     monkeypatch.setattr(catalog_module, "_get_json", response)
 

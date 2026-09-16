@@ -70,11 +70,15 @@ with the prepared artifact and manifest, then validate the downloaded file with
   version; do not replace an immutable release with fresh ciphertext.
 - Client and release tooling bound plaintext at 512 KiB and envelopes at 710,000
   bytes. No compression or key URL is accepted from an envelope.
-- Existing plaintext feeds and custom hosts remain compatible. Publisher
-  authentication applies to sealed envelopes; ordinary feeds retain their TLS
-  and schema boundary. An older client cannot read sealed editions. Release a
-  compatible client before switching an existing production feed, and decide
-  the older-client support window explicitly.
+- Public pulls accept sealed editions only (client 0.2.17 and later). A valid
+  but unsigned document from any public or custom host is refused as
+  `invalid_artifact` and never reaches disk: the publisher signature, not TLS
+  to the host, is what makes served prompts, playbooks and one-click model pins
+  trustworthy. Every live channel has been sealed since September 2026, so this
+  changes nothing for installed clients. Enterprise catalogs served by an
+  operator's own server (`api_base_url`) are a separate, trusted path and stay
+  plain. Authoring and release tooling still open plain drafts deliberately.
+  An older client cannot read sealed editions.
 - The website manifest inventories and hashes the *encrypted* served bytes.
   The private release archive preserves those exact bytes. Local client caches
   contain validated plaintext, with existing source receipts bound to that

@@ -186,12 +186,17 @@ def _get_json(
 
 
 def _get_catalog_json(url: str, channel: str) -> dict[str, object] | str:
-    """Decrypt before the existing production parser/cache boundary; never fetch a key URL."""
+    """Decrypt before the existing production parser/cache boundary; never fetch a key URL.
+
+    Public pulls accept sealed editions only: the publisher signature, not the
+    host, is what makes downloaded prompts, playbooks and model pins trustworthy.
+    Enterprise catalogs (``pull_catalog``) come from the operator's own server
+    and do not pass through here."""
     document = _get_json(url, max_bytes=MAX_ENVELOPE_BYTES)
     if isinstance(document, str):
         return document
     try:
-        result = open_catalog(document, channel)
+        result = open_catalog(document, channel, require_sealed=True)
         if len(json.dumps(result, ensure_ascii=False).encode("utf-8")) > MAX_PLAINTEXT_BYTES:
             return "invalid_artifact"
         return result

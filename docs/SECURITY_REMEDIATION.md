@@ -14,6 +14,7 @@ Implemented corrections:
 | Transport | Ingest redirects refused; only 202 acknowledges submission |
 | Config edits | Private atomic writes and backups preserve existing ACLs/modes; links refused |
 | Catalog network | Checked public IPs pinned to TLS connections; redirects revalidated; ambient proxies disabled |
+| Catalog authenticity | Public pulls refuse unsigned editions (2026-09-16 open-source readiness review): the pinned publisher key, not control of the content host, is the trust anchor for served prompts, playbooks and model pins |
 | Runtime and dependencies | Verified Python 3.14.7; refreshed npm lockfile; CI audits all frontend dependencies |
 | Public source | Explicit file inventory, committed-byte export without private history, synthetic fixtures |
 | Redistribution | Reviewed Microsoft SDK notices/provenance; frozen macOS notices; container LICENSE/NOTICE |

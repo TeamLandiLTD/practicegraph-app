@@ -73,9 +73,11 @@ DEFAULT_LICENSE_SOURCE_URL = "https://practicegraph.dev"
 DEFAULT_UPDATE_SOURCE_URL = (
     "https://github.com/TeamLandiLTD/practicegraph-app/releases/latest/download/update.json"
 )
-DEFAULT_SKILLS_SOURCE_URL = (
-    "https://raw.githubusercontent.com/TeamLandiLTD/skill-registry/main/skills.json"
-)
+# The skills feed is a sealed edition on the content host like every other
+# channel (2026-09-16). It used to be the plaintext skills.json in the public
+# skill-registry repository; public pulls now refuse unsigned editions, and the
+# sealed copy is the one the editorial pipeline keeps current.
+DEFAULT_SKILLS_SOURCE_URL = DEFAULT_CONTENT_BASE_URL + "/skills.json"
 # The documentation shelf: same serving host as news and the rate card (the
 # apex is still parked — see the rate-card note above; swap together).
 DEFAULT_DOCS_SOURCE_URL = f"{DEFAULT_CONTENT_BASE_URL}/docs.json"

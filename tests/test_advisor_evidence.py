@@ -13,6 +13,7 @@ import pytest
 from tools import curate_advisor
 from tools.content_release import validate_draft
 
+from conftest import sealed
 from practicegraph import catalog
 from practicegraph.analysis.advisor import build_advisor_board
 from practicegraph.analysis.advisor_market import (
@@ -305,7 +306,15 @@ def test_downloader_accepts_v2_and_preserves_it_when_later_evidence_is_invalid(
     store.migrate()
     now = datetime(2026, 9, 6, tzinfo=UTC)
     document = _document()
-    monkeypatch.setattr(catalog, "_get_json", lambda *_args, **_kwargs: document)
+    # Served sealed while valid; once the test breaks the document below, the
+    # publisher would not sign it, so it arrives plain and is refused.
+    monkeypatch.setattr(
+        catalog,
+        "_get_json",
+        lambda *_args, **_kwargs: (
+            sealed("advisor", document) if parse_advisor_artifact(document) else document
+        ),
+    )
     assert catalog.pull_public_advisor(store, config, now) == "pulled"
     assert catalog.load_advisor(tmp_path) == parse_advisor_artifact(document)
     accepted = (tmp_path / "catalog/advisor.json").read_bytes()

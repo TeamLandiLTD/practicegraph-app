@@ -9,13 +9,16 @@ from __future__ import annotations
 
 import ipaddress
 import json
+import os
 import socket
 import tempfile
 from datetime import UTC, date, datetime
 from pathlib import Path
 
 import pytest
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
+from practicegraph import catalog_crypto
 from practicegraph.analysis.aggregate import DailySnapshot, build_daily_snapshot
 from practicegraph.analysis.ratecard import reset_active_rate_card
 from practicegraph.analysis.schedule import TZDATA_VERSION, ScheduleProfile
@@ -246,3 +249,34 @@ def build_dashboard_summary() -> dict[str, object]:
     return build_summary(
         payloads_by_day, k_threshold=2, from_day="2026-06-30", to_day="2026-07-02"
     )
+
+
+# --- Sealed editions for public-pull tests -------------------------------
+# Public catalog pulls accept sealed editions only (catalog._get_catalog_json,
+# 2026-09-16). Tests that model a served edition wrap it with ``sealed`` so the
+# document crosses the same boundary an installed client enforces. The
+# synthetic publisher key is merged into READER_KEYS for every test; tests that
+# install their own publisher (testcatalog_crypto) still override it.
+TEST_PUBLISHER_KEY_ID = "test-publisher"
+_TEST_SIGNING_SEED = Ed25519PrivateKey.generate().private_bytes_raw()
+_TEST_READER_KEY = os.urandom(32)
+_TEST_PUBLIC_KEY = (
+    Ed25519PrivateKey.from_private_bytes(_TEST_SIGNING_SEED).public_key().public_bytes_raw()
+)
+
+
+@pytest.fixture(autouse=True)
+def _test_publisher_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        catalog_crypto,
+        "READER_KEYS",
+        {
+            **catalog_crypto.READER_KEYS,
+            TEST_PUBLISHER_KEY_ID: (_TEST_READER_KEY, _TEST_PUBLIC_KEY),
+        },
+    )
+
+
+def sealed(channel: str, document: dict[str, object]) -> dict[str, object]:
+    """A served edition as the client receives it: encrypted and publisher-signed."""
+    return catalog_crypto.seal(document, channel, TEST_PUBLISHER_KEY_ID, _TEST_SIGNING_SEED)

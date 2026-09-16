@@ -2,6 +2,7 @@
 .dockerignore
 .gitattributes
 .github/ISSUE_TEMPLATE/bug_report.yml
+.github/ISSUE_TEMPLATE/config.yml
 .github/ISSUE_TEMPLATE/idea.yml
 .github/PULL_REQUEST_TEMPLATE.md
 .github/workflows/ci.yml
@@ -281,6 +282,7 @@ tests/test_curate_news_rich.py
 tests/test_curate_news_skill.py
 tests/test_dashboard.py
 tests/test_dayclose.py
+tests/test_demo_logs.py
 tests/test_docs_shelf.py
 tests/test_doctor.py
 tests/test_economy.py
@@ -356,6 +358,7 @@ tools/curate_community.py
 tools/curate_models.py
 tools/curate_news.py
 tools/curate_news_rich.py
+tools/demo_logs.py
 tools/editorial_workspace.py
 tools/harness_playbooks.py
 tools/public_source.py

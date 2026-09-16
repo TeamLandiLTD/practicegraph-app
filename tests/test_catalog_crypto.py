@@ -36,7 +36,11 @@ def test_round_trip_uses_random_nonces_and_preserves_plain_compatibility(publish
     assert first["nonce"] != second["nonce"] and first["ciphertext"] != second["ciphertext"]
     assert document["entries"][0]["title"] not in json.dumps(first)
     assert crypto.open_catalog(first, "training") == document
+    # Authoring tools may open a plain draft; the client's network boundary may not.
     assert crypto.open_catalog(document, "training") == document
+    with pytest.raises(ValueError, match="unsigned"):
+        crypto.open_catalog(document, "training", require_sealed=True)
+    assert crypto.open_catalog(first, "training", require_sealed=True) == document
     with pytest.raises(ValueError):
         crypto.open_catalog(first, "news")
 

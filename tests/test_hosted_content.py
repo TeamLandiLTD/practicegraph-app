@@ -8,6 +8,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from tools.content_release import inventory, prepare, validate_draft
 
+from conftest import sealed
 from practicegraph import catalog
 from practicegraph.config import resolve
 from practicegraph.content import profile_url
@@ -91,7 +92,8 @@ def test_profile_pull_is_separate_and_preserves_custom_query(tmp_path, monkeypat
 
     def get(url, **_kwargs):
         seen.append(url)
-        return SAMPLE_DOCS_DOCUMENT
+        channel = "docs-productivity" if "docs-productivity" in url else "docs"
+        return sealed(channel, SAMPLE_DOCS_DOCUMENT)
 
     monkeypatch.setattr(catalog, "_get_json", get)
     assert catalog.pull_public_docs(store, config, NOW) == "pulled"
@@ -110,7 +112,9 @@ def test_failed_refresh_keeps_receipt_and_old_date_never_becomes_fresh(tmp_path,
     config = resolve({"PRACTICEGRAPH_DATA_DIR": str(tmp_path)})
     store = Store.in_data_dir(tmp_path)
     store.migrate()
-    monkeypatch.setattr(catalog, "_get_json", lambda *_args, **_kwargs: edition())
+    monkeypatch.setattr(
+        catalog, "_get_json", lambda *_args, **_kwargs: sealed("community", edition())
+    )
     assert catalog.pull_public_community(store, config, NOW) == "pulled"
     path = tmp_path / "catalog/community.json"
     original_mtime = path.stat().st_mtime_ns

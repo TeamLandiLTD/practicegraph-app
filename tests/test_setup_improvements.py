@@ -10,6 +10,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from tools.content_release import inventory, prepare
 
+from conftest import sealed
 from practicegraph import catalog
 from practicegraph.analysis import setup_improvements as si
 from practicegraph.analysis.harness_playbooks import SCHEMA, compatible, parse_playbooks
@@ -355,7 +356,9 @@ def test_playbooks_follow_host_overrides_and_retain_valid_cache(tmp_path, monkey
     assert explicit.playbooks_source_url.endswith("/explicit.json")
     store = Store(tmp_path / "state.db")
     store.migrate()
-    monkeypatch.setattr(catalog, "_get_json", lambda *_args, **_kwargs: edition())
+    monkeypatch.setattr(
+        catalog, "_get_json", lambda *_args, **_kwargs: sealed("harness-playbooks", edition())
+    )
     assert catalog.pull_public_playbooks(store, config, NOW) == "pulled"
     original = catalog.load_playbooks(tmp_path)
     monkeypatch.setattr(catalog, "_get_json", lambda *_args, **_kwargs: {"broken": True})

@@ -28,6 +28,30 @@ Unpack the exact ZIP in a fresh directory, inspect its inventory, scan it for
 secrets and editorial/private material, and run its tests before publication.
 Retain the ZIP and provenance alongside the installer and SBOM.
 
+### Screenshots
+
+`docs/screenshots/*.png` come from a synthetic profile, never from a
+maintainer's own logs (they are personal work-pattern readings). Regenerate
+them with the demo generator, a throwaway data directory and a headless
+browser at 1280 px wide:
+
+```powershell
+uv run python -m tools.demo_logs --out $env:TEMP\pg-demo\logs --days 35 --seed 7 --end (Get-Date -Format yyyy-MM-dd) --end-hour (Get-Date).Hour --tz Europe/Sofia
+$env:PRACTICEGRAPH_DATA_DIR = "$env:TEMP\pg-demo\data"
+$env:PRACTICEGRAPH_CLAUDE_HOME = "$env:TEMP\pg-demo\logs\claude"
+$env:PRACTICEGRAPH_CODEX_HOME = "$env:TEMP\pg-demo\logs\codex"
+uv run python -m practicegraph init
+uv run python -m practicegraph schedule set --timezone Europe/Sofia --working-days mon,tue,wed,thu,fri --work-start 09:00 --work-end 18:00 --quiet-start 22:00 --quiet-end 07:00 --weekend-mode exceptional
+uv run python -m practicegraph agent run --once
+uv run python -m practicegraph ui serve
+```
+
+Then capture each page from the endpoint in `ui.json`: `--window-size=1280,980`
+for `#spend`, `1280,1100` for `#models`, `#tools` and `#news`, `1280,1150` for
+`#api-prices`, `1280,1200` for `#mindfulness`, with `--headless=new
+--hide-scrollbars --virtual-time-budget=30000`. `--end-hour` keeps the last
+day's readings before the moment of capture so the limits card shows times.
+
 ## Build and verify
 
 Use Python 3.14.7 for release runtimes. The Windows build verifies the official

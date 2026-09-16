@@ -76,14 +76,27 @@ def seal(
     return {**payload, "signature": _b64(signer.sign(_canonical(payload)))}
 
 
-def open_catalog(document: object, channel: str) -> dict[str, Any]:
-    """Accept legacy plain JSON; encrypted-shaped failures never fall back to plain."""
+def open_catalog(
+    document: object, channel: str, *, require_sealed: bool = False
+) -> dict[str, Any]:
+    """Open a sealed edition, or pass a plain draft through when the caller allows it.
+
+    ``require_sealed`` is the network boundary: every public pull sets it, so a
+    document that reaches the client unsigned is rejected even though the
+    transport was TLS. Without it the trust anchor for skills prompts, playbooks
+    and one-click model pins would be control of the content host, not the
+    pinned publisher key (open-source readiness review, 2026-09-16). Authoring
+    and release tooling open plain drafts deliberately and leave it off.
+    Encrypted-shaped failures never fall back to plain either way.
+    """
     if not isinstance(document, dict):
         raise ValueError("invalid catalog")
     if document.get("schema") != SCHEMA:
         # Unknown transport versions must not be interpreted as plaintext.
         if str(document.get("schema", "")).startswith("practicegraph.encrypted-catalog/"):
             raise ValueError("unsupported encrypted catalog")
+        if require_sealed:
+            raise ValueError("unsigned catalog")
         return document
     try:
         if (

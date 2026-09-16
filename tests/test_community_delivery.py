@@ -7,7 +7,7 @@ import json
 from datetime import UTC, datetime, timedelta
 
 import practicegraph.catalog as catalog
-from conftest import FIXTURE_GENERATED_AT, build_fixture_extras, build_fixture_snapshot
+from conftest import FIXTURE_GENERATED_AT, build_fixture_extras, build_fixture_snapshot, sealed
 from practicegraph import __version__
 from practicegraph.analysis.insights import Finding
 from practicegraph.analysis.ratecard import RATE_CARD_VERSION
@@ -35,7 +35,9 @@ def test_edition_reaches_local_reading_and_survives_invalid_refresh(tmp_path, mo
     config = resolve({"PRACTICEGRAPH_DATA_DIR": str(tmp_path)})
     store = Store.in_data_dir(tmp_path)
     store.migrate()
-    monkeypatch.setattr(catalog, "_get_json", lambda *_args, **_kwargs: edition())
+    monkeypatch.setattr(
+        catalog, "_get_json", lambda *_args, **_kwargs: sealed("community", edition())
+    )
     assert catalog.pull_public_community(store, config, NOW) == "pulled"
     assert catalog.load_community(tmp_path).items[0].item_id == "small-retry"
     assert catalog.pull_public_community(store, config, NOW) == "skipped_recently"

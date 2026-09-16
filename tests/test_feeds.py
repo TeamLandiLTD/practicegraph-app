@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 import practicegraph.catalog as catalog_module
+from conftest import sealed
 from practicegraph.analysis.build_ideas import parse_build_ideas_artifact
 from practicegraph.catalog import (
     HISTORY_KEEP_DAYS,
@@ -97,7 +98,7 @@ def test_news_pull_archives_a_dated_copy_and_prunes_the_shelf(
     monkeypatch.setattr(
         catalog_module,
         "_get_json",
-        lambda url, timeout_s=10.0, **_kwargs: _news_artifact(f"day-{offset}"),
+        lambda url, timeout_s=10.0, **_kwargs: sealed("news", _news_artifact(f"day-{offset}")),
     )
     # One pull per day for a month: the shelf holds only the newest
     # HISTORY_KEEP_DAYS, oldest pruned, newest first.
@@ -120,7 +121,7 @@ def test_a_tampered_archived_day_reads_as_empty_not_as_content(
     monkeypatch.setattr(
         catalog_module,
         "_get_json",
-        lambda url, timeout_s=10.0, **_kwargs: _news_artifact(),
+        lambda url, timeout_s=10.0, **_kwargs: sealed("news", _news_artifact()),
     )
     assert pull_public_news(store, config, NOW) == "pulled"
     day = NOW.date().isoformat()
@@ -148,7 +149,7 @@ def test_build_ideas_pull_validates_archives_and_starts_empty(
     monkeypatch.setattr(
         catalog_module,
         "_get_json",
-        lambda url, timeout_s=10.0, **_kwargs: _ideas_artifact(),
+        lambda url, timeout_s=10.0, **_kwargs: sealed("build-ideas", _ideas_artifact()),
     )
     assert pull_public_build_ideas(store, config, NOW) == "pulled"
     assert load_build_ideas(config.data_dir).ideas[0].idea_id == "served-idea"
@@ -295,7 +296,7 @@ def test_todays_own_key_never_appears_as_a_previous_day(
     monkeypatch.setattr(
         catalog_module,
         "_get_json",
-        lambda url, timeout_s=10.0, **_kwargs: _news_artifact(),
+        lambda url, timeout_s=10.0, **_kwargs: sealed("news", _news_artifact()),
     )
     assert pull_public_news(store, config, NOW) == "pulled"
     assert pull_public_news(store, config, NOW + timedelta(days=1)) == "pulled"
