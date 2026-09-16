@@ -27,7 +27,7 @@ def test_news_source_defaults_to_public_site(tmp_path: Path) -> None:
     config = resolve({"PRACTICEGRAPH_DATA_DIR": str(tmp_path)})
 
     assert DEFAULT_NEWS_SOURCE_URL == (
-        "https://practicegraph-dev.vercel.app/news.json"
+        "https://practicegraph.dev/news.json"
     )
     assert config.news_source_url == DEFAULT_NEWS_SOURCE_URL
     assert config.news_source_url_source == "default"

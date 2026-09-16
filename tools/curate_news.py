@@ -45,7 +45,7 @@ from practicegraph_server.rss import (  # noqa: E402
 
 # The website repo (CodeTeamLandi/practicegraph.dev). The curated file lands at
 # its root as news.json; the client fetches
-# https://practicegraph-dev.vercel.app/news.json (DEFAULT_NEWS_SOURCE_URL).
+# https://practicegraph.dev/news.json (DEFAULT_NEWS_SOURCE_URL).
 DEFAULT_SITE_REPO = _REPO.parent / "practicegraph.dev"
 NEWS_FILE_NAME = "news.json"
 

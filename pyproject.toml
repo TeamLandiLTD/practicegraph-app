@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "practicegraph"
-version = "0.2.16"
+version = "0.2.17"
 description = "Privacy-preserving AI-usage maturity agent: all analysis happens on the endpoint."
 readme = "README.md"
 license = {file = "LICENSE"}

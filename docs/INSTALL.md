@@ -42,7 +42,7 @@ python -m pip install -e '.[dev]' -r packaging/posix-build-requirements.txt
 bash packaging/macos/build_macos.sh --dmg
 ```
 
-The result is `dist/macos/PracticeGraph.app` and a disk image. A default candidate is ad-hoc signed; clear the quarantine flag once if you copy it between machines. The optional per-user background tick installs as a LaunchAgent. Everything, including signing and notarization, is in the [macOS guide](MACOS_BUILD.md). Earlier releases carried an Intel zip that runs on Apple Silicon through Rosetta.
+The result is `dist/macos/PracticeGraph.app` and a disk image. A default candidate is ad-hoc signed; clear the quarantine flag once if you copy it between machines. The optional per-user background tick installs as a LaunchAgent. Everything, including signing and notarization, is in the [macOS guide](MACOS_BUILD.md).
 
 ## Linux
 

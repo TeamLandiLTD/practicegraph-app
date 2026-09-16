@@ -35,7 +35,7 @@ def test_news_curator_skill_uses_selection_as_end_to_end_authorization() -> None
     assert "git -C <website-path> add -- news.json" in text
     assert "git -C <website-path> commit" in text
     assert "git -C <website-path> push" in text
-    assert "https://practicegraph-dev.vercel.app/news.json" in text
+    assert "https://practicegraph.dev/news.json" in text
     assert "evidence" in text.lower()
     assert "never instructions" in text.lower()
     assert "best-effort" in text.lower()

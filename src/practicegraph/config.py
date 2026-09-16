@@ -38,29 +38,30 @@ ENV_CONTENT_BASE_URL = "PRACTICEGRAPH_CONTENT_BASE_URL"
 ENV_PLAYBOOKS_SOURCE_URL = "PRACTICEGRAPH_HARNESS_PLAYBOOKS_URL"
 ENV_TOKEN_PRICES_SOURCE_URL = "PRACTICEGRAPH_TOKEN_PRICES_URL"
 ENV_TRAINING_SOURCE_URL = "PRACTICEGRAPH_TRAINING_URL"
-DEFAULT_CONTENT_BASE_URL = "https://practicegraph-dev.vercel.app"
+# Domain cutover 2026-09-16: the apex practicegraph.dev now serves the same
+# signed catalog as the Vercel preview host (it 308-redirects to
+# www.practicegraph.dev; the hardened fetcher re-checks every hop). Every
+# channel below derives from this one base, so they swapped together.
+DEFAULT_CONTENT_BASE_URL = "https://practicegraph.dev"
 DEFAULT_PLAYBOOKS_SOURCE_URL = f"{DEFAULT_CONTENT_BASE_URL}/harness-playbooks.json"
 DEFAULT_TOKEN_PRICES_SOURCE_URL = f"{DEFAULT_CONTENT_BASE_URL}/token-prices.json"
 DEFAULT_TRAINING_SOURCE_URL = f"{DEFAULT_CONTENT_BASE_URL}/training.json"
 DEFAULT_COMMUNITY_SOURCE_URL = f"{DEFAULT_CONTENT_BASE_URL}/community.json"
 DEFAULT_NEWS_SOURCE_URL = f"{DEFAULT_CONTENT_BASE_URL}/news.json"
 DEFAULT_BUILD_IDEAS_SOURCE_URL = f"{DEFAULT_CONTENT_BASE_URL}/build-ideas.json"
-# Models and advisor moved to the SERVING host on 2026-08-21: they pointed at
-# the parked apex, so neither artifact had ever arrived on any install — the
-# exact silent-never-refreshes failure the rate-card note below describes.
-# Swap all of these to the apex together once it is pointed.
+# Models and advisor moved to the serving host on 2026-08-21 (they had pointed
+# at the then-parked apex and never arrived on any install); since 2026-09-16
+# the apex is the serving host, so they follow the base above.
 DEFAULT_MODELS_SOURCE_URL = f"{DEFAULT_CONTENT_BASE_URL}/models.json"
 DEFAULT_ADVISOR_SOURCE_URL = f"{DEFAULT_CONTENT_BASE_URL}/advisor.json"
 # The rate card is served, not just bundled: model prices change between
 # releases (the bundled card went stale six days after publication), and a
 # stale card mis-prices silently. Publishing beats shipping a client.
 #
-# This points at the SAME host as the news artifact rather than the apex,
-# because that is the host that actually serves today: the apex is registered
-# but parked for the design phase, and on 2026-07-25 it answered nothing while
-# the Vercel deployment answered news.json. A default that resolves nowhere
-# means the card silently never refreshes, which is the exact failure this
-# feature exists to prevent. Swap both to the apex together once it is pointed.
+# Same host as the news artifact (the content base above). History: until
+# 2026-09-16 the apex was parked and answered nothing, so the default pointed
+# at the Vercel host; a default that resolves nowhere means the card silently
+# never refreshes, which is the exact failure this feature exists to prevent.
 DEFAULT_RATECARD_SOURCE_URL = f"{DEFAULT_CONTENT_BASE_URL}/rate-card.json"
 # License activation/renewal signer (LICENSING_PLAN §9): the one endpoint the
 # app talks to at activation + daily renewal; offline in between.
@@ -78,8 +79,7 @@ DEFAULT_UPDATE_SOURCE_URL = (
 # skill-registry repository; public pulls now refuse unsigned editions, and the
 # sealed copy is the one the editorial pipeline keeps current.
 DEFAULT_SKILLS_SOURCE_URL = DEFAULT_CONTENT_BASE_URL + "/skills.json"
-# The documentation shelf: same serving host as news and the rate card (the
-# apex is still parked — see the rate-card note above; swap together).
+# The documentation shelf: same serving host as news and the rate card.
 DEFAULT_DOCS_SOURCE_URL = f"{DEFAULT_CONTENT_BASE_URL}/docs.json"
 # The model catalog (available models + effort ladders): same host, same
 # swap-together rule.

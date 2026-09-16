@@ -373,7 +373,7 @@ def test_public_models_pull_is_validated_cached_and_daily(
     assert pull_public_models(store, config, NOW) == "pulled"
     assert load_models(config.data_dir) is not None
     assert pull_public_models(store, config, NOW) == "skipped_already_today"
-    assert calls == ["https://practicegraph-dev.vercel.app/models.json"]
+    assert calls == ["https://practicegraph.dev/models.json"]
 
 
 def test_public_models_skip_enterprise_and_reject_plaintext(tmp_path: Path) -> None:
@@ -732,7 +732,7 @@ def test_public_advisor_pull_is_validated_cached_and_daily(
     cached = load_advisor(config.data_dir)
     assert cached is not None and cached.models[0].family == "claude_haiku"
     assert pull_public_advisor(store, config, NOW) == "skipped_already_today"
-    assert calls == ["https://practicegraph-dev.vercel.app/advisor.json"]
+    assert calls == ["https://practicegraph.dev/advisor.json"]
 
 
 def test_public_advisor_skips_enterprise_and_rejects_plaintext(tmp_path: Path) -> None:

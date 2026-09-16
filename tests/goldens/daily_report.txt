@@ -59,4 +59,4 @@ SOURCE HEALTH (all scanned logs)
 
 STATUS
   All analysis ran locally on this machine. Nothing left this machine.
-  Generated 2026-07-02 18:00 UTC | PracticeGraph 0.2.16 | rate card bundled-2026-07-25
+  Generated 2026-07-02 18:00 UTC | PracticeGraph 0.2.17 | rate card bundled-2026-07-25

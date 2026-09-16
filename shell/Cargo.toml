@@ -1,6 +1,6 @@
 [package]
 name = "practicegraph-shell"
-version = "0.2.16"
+version = "0.2.17"
 edition = "2021"
 description = "PracticeGraph native Windows shell: service host + tray + toasts (C-2). A thin shell over the core CLI (C-6); all writes go through the CLI (C-4)."
 license = "Apache-2.0"

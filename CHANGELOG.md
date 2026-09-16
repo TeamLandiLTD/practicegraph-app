@@ -45,4 +45,4 @@ Every build is its own version; a version number is never rebuilt or reused. Win
 
 ## Earlier
 
-Versions 0.1.28 to 0.1.31 (August 2026) introduced the harness inventory pages, the guided break system, the Let's build tab, one-click model defaults and dated shelves for news and build ideas. Their notes are on the Releases page.
+Versions 0.1.28 to 0.1.31 (August 2026) were pilot builds that introduced the harness inventory pages, the guided break system, the Let's build tab, one-click model defaults and dated shelves for news and build ideas. They are no longer published; 0.2.16 is the first release with its source.

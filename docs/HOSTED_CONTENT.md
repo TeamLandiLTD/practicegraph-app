@@ -81,8 +81,8 @@ before publishing fields older strict parsers will reject.
 
 ## Client behavior
 
-- The official default remains `https://practicegraph-dev.vercel.app` until domain
-  cutover. Set `PRACTICEGRAPH_CONTENT_BASE_URL` or `content_base_url` in `config.json`
+- The official default is `https://practicegraph.dev` (domain cutover 2026-09-16; the
+  apex redirects to `www.practicegraph.dev`). Set `PRACTICEGRAPH_CONTENT_BASE_URL` or `content_base_url` in `config.json`
   to use another compatible host/path. Explicit per-channel URLs win. A base
   override includes skills; the unchanged default skills source is its separate
   registry. The updater and aggregate server are separate configuration.
