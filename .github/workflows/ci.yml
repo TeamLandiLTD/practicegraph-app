@@ -63,8 +63,10 @@ jobs:
           python -m pip install pip-audit
           python -m pip freeze --exclude-editable > ci-env-requirements.txt
           python -m pip_audit --strict --progress-spinner off -r ci-env-requirements.txt
+      # The hashes pin the win_amd64 wheels that ship, so pip cannot install
+      # them on Linux; --disable-pip audits the pinned versions directly.
       - name: Audit shipped Python pins
-        run: python -m pip_audit --strict --progress-spinner off -r packaging/shipped-requirements.txt
+        run: python -m pip_audit --strict --progress-spinner off --disable-pip -r packaging/shipped-requirements.txt
 
   # Maintainer-only native build, exact payload verification and personal runtime smoke.
   native-windows:
