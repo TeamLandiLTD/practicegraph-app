@@ -1,6 +1,11 @@
 # Public contributions run only on disposable GitHub-hosted runners.
 # Native Windows packaging uses a maintainer-dispatched self-hosted job.
 # See https://docs.github.com/en/actions/reference/security/secure-use
+#
+# While the repository is private, hosted minutes come out of the
+# organisation's shared allowance, where Windows bills at 2x and macOS at
+# 10x. Pushes and pull requests therefore run the checks on Linux; the
+# Windows checks and the macOS builds run on release tags and manual runs.
 name: ci
 
 on:
@@ -17,7 +22,8 @@ concurrency:
 
 jobs:
   checks:
-    runs-on: windows-latest
+    # aae-runner-exception: github-hosted-approved: public contributions run only on disposable hosted runners (CONTRIBUTING.md)
+    runs-on: ${{ (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') && 'windows-latest' || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,12 +40,14 @@ jobs:
         run: python -m pip install -e ".[dev]"
       - name: Lint
         run: python -m ruff check src tests
+      # The shipped app is Windows-first; type-check it as Windows on every OS.
       - name: Types
-        run: python -m mypy
+        run: python -m mypy --platform win32
       - name: Tests (fixtures, privacy, integration)
         run: python -m pytest
       - name: Frontend tests and production build
         working-directory: ui
+        shell: pwsh
         run: |
           npm ci
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -121,6 +129,8 @@ jobs:
         run: powershell -ExecutionPolicy Bypass -File packaging/build_workstation.ps1 -Msi -RustToolchain stable-gnu
   # Native candidates are built and tested on disposable hosted runners.
   native-macos:
+    # aae-runner-exception: github-hosted-approved: no self-hosted macOS runner; release tags and manual runs only
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
@@ -157,6 +167,7 @@ jobs:
           retention-days: 14
 
   native-linux:
+    # aae-runner-exception: github-hosted-approved: public contributions run only on disposable hosted runners (CONTRIBUTING.md)
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -192,6 +203,7 @@ jobs:
           retention-days: 14
 
   posix-privacy:
+    # aae-runner-exception: github-hosted-approved: public contributions run only on disposable hosted runners (CONTRIBUTING.md)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -204,6 +216,7 @@ jobs:
       - run: python -m pytest tests/test_security_regressions.py tests/test_nethttp.py tests/test_pin_model.py
 
   container:
+    # aae-runner-exception: github-hosted-approved: public contributions run only on disposable hosted runners (CONTRIBUTING.md)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
