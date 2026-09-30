@@ -17,7 +17,7 @@ tao = "=0.35.3"
 wry = "=0.55.1"
 
 [dependencies.windows-sys]
-version = "0.59"
+version = "0.61"
 features = [
     "Win32_Foundation",
     "Win32_Graphics_Gdi",
