@@ -1,0 +1,17 @@
+# Pilot deployment reference (FR-DEP-7). Storage migrations bootstrap on start.
+services:
+  practicegraph-server:
+    build: .
+    ports:
+      - "127.0.0.1:8321:8321"  # loopback-bound pilot (FR-API-6)
+    environment:
+      PG_SERVER_ORG_ID: ${PG_SERVER_ORG_ID:?set the org id}
+      PG_SERVER_INGEST_TOKENS: ${PG_SERVER_INGEST_TOKENS:?set a JSON source credential map}
+      PG_SERVER_DASHBOARD_PASSWORD: ${PG_SERVER_DASHBOARD_PASSWORD:?set a separate admin credential}
+      PG_SERVER_K_THRESHOLD: ${PG_SERVER_K_THRESHOLD:-5}
+    volumes:
+      - practicegraph-data:/data
+    restart: unless-stopped
+
+volumes:
+  practicegraph-data:

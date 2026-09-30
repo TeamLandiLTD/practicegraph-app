@@ -1,0 +1,103 @@
+{
+  "schema": "practicegraph.token-prices.research/1",
+  "edition_version": "synthetic-2026-09-10-01",
+  "observed_at": "2026-09-10T12:00:00Z",
+  "scope": {
+    "model_selection": "Synthetic example only; replace all rows with sourced offers.",
+    "provider_selection": "One fictitious provider; not market data.",
+    "coverage_notes": "Demonstrates the format, not real prices or a publishable edition."
+  },
+  "sources": [
+    {
+      "id": "example-catalog",
+      "url": "https://example.com/pricing",
+      "title": "Synthetic catalog for validator examples",
+      "publisher": "Example Host (fictitious)",
+      "kind": "official",
+      "checked_at": "2026-09-10T11:00:00Z",
+      "notes": "SYNTHETIC. No real source was checked. Replace this entire source and offer before research."
+    }
+  ],
+  "models": [
+    {
+      "id": "example-model-r1",
+      "developer": "Example Developer",
+      "name": "Example Model",
+      "revision": "r1",
+      "weights": "open",
+      "license": null,
+      "source_ids": [
+        "example-catalog"
+      ]
+    }
+  ],
+  "offers": [
+    {
+      "id": "example-host-model-r1-standard",
+      "model_id": "example-model-r1",
+      "provider": "example-host",
+      "channel": "direct",
+      "upstream_provider": null,
+      "api_model_id": "example/model-r1",
+      "region": null,
+      "service_tier": "standard",
+      "precision": null,
+      "context_band": {
+        "min": null,
+        "max": null
+      },
+      "status": "available",
+      "observed_at": "2026-09-10T11:30:00Z",
+      "effective_from": null,
+      "effective_to": null,
+      "limits": {
+        "context_tokens": null,
+        "output_tokens": null,
+        "requests_per_minute": null,
+        "tokens_per_minute": null
+      },
+      "capabilities": {
+        "tools": null,
+        "structured_outputs": null,
+        "vision": null
+      },
+      "pricing": {
+        "currency": "USD",
+        "unit": "usd_per_1m_tokens",
+        "input": "0.20",
+        "output": "0.60",
+        "cache_read": null,
+        "cache_write": null,
+        "cache_ttl_seconds": null,
+        "reasoning_billing": "unknown",
+        "extra_charges": [],
+        "conditions": "SYNTHETIC input and output rates; other billing conditions unknown.",
+        "source_ids": [
+          "example-catalog"
+        ]
+      },
+      "terms": {
+        "training_use": "unknown",
+        "retention_days": null,
+        "zero_retention": null,
+        "notes": "Not researched in this synthetic example.",
+        "source_ids": []
+      },
+      "measurements": [],
+      "source_ids": [
+        "example-catalog"
+      ],
+      "notes": "SYNTHETIC example. Unknown precision, region and capabilities prevent a confident equivalence claim."
+    }
+  ],
+  "coverage": [
+    {
+      "provider": "example-host",
+      "status": "checked",
+      "notes": "SYNTHETIC coverage record only.",
+      "source_ids": [
+        "example-catalog"
+      ]
+    }
+  ]
+}

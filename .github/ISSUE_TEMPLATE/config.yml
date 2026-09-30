@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Getting help
+    url: https://github.com/TeamLandiLTD/practicegraph-app/blob/main/SUPPORT.md
+    about: Where each kind of question goes, and what to include so it can be answered.
+  - name: Report a vulnerability
+    url: https://github.com/TeamLandiLTD/practicegraph-app/blob/main/SECURITY.md
+    about: Privately, never in a public issue. The security policy explains how.
+  - name: Documentation
+    url: https://github.com/TeamLandiLTD/practicegraph-app/blob/main/docs/README.md
+    about: Install, privacy, the pages and their numbers, troubleshooting, building from source.

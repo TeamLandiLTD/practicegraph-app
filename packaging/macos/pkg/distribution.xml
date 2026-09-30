@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The macOS installer wizard (the Windows MSI's WixUI_Minimal counterpart):
+  Welcome -> Licence -> Install -> Done. build_macos.sh substitutes @VERSION@
+  and passes the two component packages it builds.
+
+  The app itself cannot be unticked; "Background refresh" (the per-user
+  LaunchAgent) is ticked by default under Customize. Apple silicon and
+  macOS 13 only, matching the app's architecture and LSMinimumSystemVersion.
+-->
+<installer-gui-script minSpecVersion="2">
+    <title>PracticeGraph</title>
+    <organization>dev.practicegraph</organization>
+    <welcome file="welcome.html" mime-type="text/html"/>
+    <license file="LICENSE.txt" mime-type="text/plain"/>
+    <conclusion file="conclusion.html" mime-type="text/html"/>
+    <options customize="allow" require-scripts="false" hostArchitectures="arm64"/>
+    <domains enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true"/>
+    <volume-check>
+        <allowed-os-versions>
+            <os-version min="13.0"/>
+        </allowed-os-versions>
+    </volume-check>
+    <choices-outline>
+        <line choice="app"/>
+        <line choice="agent"/>
+    </choices-outline>
+    <choice id="app" title="PracticeGraph" enabled="false" selected="true"
+            description="The app, installed in Applications. A running copy is closed first; your data and settings are kept.">
+        <pkg-ref id="dev.practicegraph.app"/>
+    </choice>
+    <choice id="agent" title="Background refresh" start_selected="true"
+            description="Refreshes model guidance, benchmarks and prices every 15 minutes while the app is closed. Your own logs never leave this Mac.">
+        <pkg-ref id="dev.practicegraph.agent"/>
+    </choice>
+    <pkg-ref id="dev.practicegraph.app" version="@VERSION@" onConclusion="none">app.pkg</pkg-ref>
+    <pkg-ref id="dev.practicegraph.agent" version="@VERSION@" onConclusion="none">agent.pkg</pkg-ref>
+</installer-gui-script>

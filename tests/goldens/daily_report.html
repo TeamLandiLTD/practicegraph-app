@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PracticeGraph daily report 2026-07-02</title>
+<style>
+:root {
+  --paper-0:#fcfbf8; --paper-50:#f6f3ec; --paper-100:#efe9df; --paper-200:#e3dccd;
+  --ink-900:#181d1b; --ink-800:#232b28; --ink-700:#39423d; --ink-600:#55605a;
+  --ink-500:#727d76; --ink-400:#97a09a;
+  --teal-900:#0f3730; --teal-800:#15473d; --teal-700:#1b574b; --teal-600:#226c5f;
+  --teal-500:#2f8576; --teal-400:#4ea191; --teal-300:#82bcae; --teal-200:#b6d8cf;
+  --teal-100:#dbece7; --teal-50:#ecf4f1;
+  --sage-500:#738069; --sage-200:#cdd4c2; --sage-100:#e4e8dc;
+  --positive-600:#2f7d57; --positive-100:#dcefe2;
+  --caution-600:#a9761b; --caution-100:#f4e7cc;
+  --critical-600:#b04a30;
+  --suppressed-fg:#8d958f; --suppressed-bg:#efece4; --suppressed-line:#cdc7ba;
+  --border-hair:#e7e0d3; --border-soft:#d8cfbd;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Iowan Old Style","Times New Roman",Times,serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --r-sm:6px; --r-md:10px; --r-lg:14px; --r-pill:999px;
+  --sh-sm:0 1px 3px rgba(24,40,35,.06),0 1px 2px rgba(24,40,35,.04);
+  --sh-md:0 4px 12px rgba(24,40,35,.07),0 1px 3px rgba(24,40,35,.05);
+}
+* { box-sizing:border-box; }
+html,body { margin:0; }
+body {
+  font-family:var(--sans); background:var(--paper-0); color:var(--ink-700);
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+.num { font-family:var(--mono); font-variant-numeric:tabular-nums lining-nums;
+       font-feature-settings:"tnum" 1,"lnum" 1; }
+.eyebrow { font-size:11.5px; font-weight:600; letter-spacing:.08em;
+           text-transform:uppercase; color:var(--ink-500); }
+.card { background:#fff; border:1px solid var(--border-hair); border-radius:var(--r-lg);
+        box-shadow:var(--sh-sm); padding:22px 24px; }
+.grid { display:grid; gap:18px; }
+.g-2 { grid-template-columns:1fr 1fr; }
+.g-3 { grid-template-columns:repeat(3,1fr); }
+.muted { color:var(--ink-500); }
+.lede { font-family:var(--serif); font-style:italic; font-size:16px;
+        color:var(--ink-700); line-height:1.5; }
+.sec-head { display:flex; align-items:baseline; justify-content:space-between;
+            margin-bottom:16px; gap:12px; }
+.sec-head .meta { font-family:var(--mono); font-size:11px; color:var(--ink-400); }
+.est { display:inline-block; vertical-align:middle; margin-left:10px;
+       font-family:var(--sans); font-size:11px; font-weight:600; color:var(--ink-400);
+       border:1px solid var(--border-soft); border-radius:var(--r-pill); padding:2px 8px; }
+.tag { font-size:11px; font-weight:600; padding:2px 8px; border-radius:var(--r-pill); }
+.tag.steady { background:var(--positive-100); color:var(--positive-600); }
+.tag.emerging { background:var(--caution-100); color:var(--caution-600); }
+.tag.leading { background:var(--teal-100); color:var(--teal-800); }
+.tag.quiet { background:var(--suppressed-bg); color:var(--suppressed-fg); }
+.trust { display:inline-flex; align-items:center; gap:8px; padding:8px 14px;
+         border-radius:var(--r-pill); background:var(--teal-50);
+         border:1px solid var(--teal-200); color:var(--teal-800);
+         font-size:12.5px; font-weight:600; white-space:nowrap; }
+.trust svg { width:15px; height:15px; }
+.suppressed-panel { display:flex; gap:12px; align-items:flex-start; padding:16px 18px;
+  border-radius:var(--r-lg); background:var(--suppressed-bg);
+  background-image:repeating-linear-gradient(45deg,transparent,transparent 7px,
+    rgba(141,149,143,.12) 7px,rgba(141,149,143,.12) 8px);
+  border:1px dashed var(--suppressed-line); color:var(--suppressed-fg); }
+.suppressed-panel svg { flex:none; margin-top:1px; width:20px; height:20px; }
+.suppressed-panel .t { font-size:14px; font-weight:600; color:var(--ink-700);
+                       margin-bottom:3px; }
+.suppressed-panel .d { font-size:13px; line-height:1.45; }
+.suppressed-panel .m { font-family:var(--mono); font-size:11.5px; margin-top:7px; }
+.foot { margin-top:28px; padding-top:18px; border-top:1px solid var(--border-hair);
+        display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+        font-size:12px; color:var(--ink-400); font-family:var(--mono); }
+
+.wrap { max-width:720px; margin:0 auto; padding:28px 28px 60px; }
+header.top { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+.mark { width:38px; height:38px; border-radius:10px; background:var(--teal-600);
+        display:flex; align-items:center; justify-content:center; flex:none; }
+.brand { display:flex; flex-direction:column; gap:1px; }
+.brand .name { font-weight:700; font-size:16px; color:var(--ink-900);
+               letter-spacing:-.01em; }
+.brand .name b { color:var(--teal-700); font-weight:700; }
+.brand .sub { font-size:12.5px; color:var(--ink-500); }
+header.top .trust { margin-left:auto; }
+.stack { display:flex; flex-direction:column; gap:18px; }
+.figure { font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:44px;
+          font-weight:600; color:var(--ink-900); letter-spacing:-.02em; line-height:1; }
+.ratecard { font-family:var(--mono); font-size:11.5px; color:var(--ink-500);
+            margin-top:10px; }
+table.usage { border-collapse:collapse; width:100%; font-size:13.5px; }
+table.usage th { text-align:left; font-size:11.5px; font-weight:600;
+                 letter-spacing:.08em; text-transform:uppercase; color:var(--ink-500);
+                 padding:0 10px 10px 0; }
+table.usage td { padding:9px 10px 9px 0; border-top:1px solid var(--border-hair);
+                 color:var(--ink-800); }
+table.usage th.n, table.usage td.n { text-align:right; font-family:var(--mono);
+  font-variant-numeric:tabular-nums; }
+table.usage td.model { font-family:var(--mono); font-size:12.5px; color:var(--ink-600); }
+.srcline { display:flex; gap:12px; align-items:baseline; padding:10px 0;
+           border-top:1px solid var(--border-hair); font-size:13.5px; }
+.srcline:first-of-type { border-top:none; }
+.srcline .nm { font-weight:600; color:var(--ink-800); min-width:140px; }
+.srcline .meta { font-family:var(--mono); font-size:12px; color:var(--ink-500);
+                 flex:1; }
+.observation h1 { margin:8px 0 10px; font-family:var(--serif); font-size:26px;
+                  line-height:1.2; font-weight:500; }
+.observation .meta { font-family:var(--mono); font-size:11.5px;
+                     color:var(--teal-700); margin-top:12px; }
+.observation .muted { margin-top:12px; }
+</style>
+</head>
+<body>
+<div class="wrap stack">
+<header class="top"><span class="mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><rect x="3" y="11.5" width="3" height="5" rx="1" fill="#dbece7"></rect><rect x="9.5" y="8" width="3" height="8.5" rx="1" fill="#82bcae"></rect><rect x="16" y="4.5" width="3" height="12" rx="1" fill="#f3f8f6"></rect></svg></span><span class="brand"><span class="name">practice<b>graph</b></span><span class="sub">Daily report - 2026-07-02 (UTC local) - UTC accounting day 2026-07-02</span></span><span class="trust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg> this machine only - nothing sent</span></header>
+<section class="card observation" data-observation-id="insufficient">
+<div class="eyebrow">Work-pattern observation</div>
+<h1>No repeated pattern yet</h1>
+<p>The available history has not cleared a repeated-pattern sample gate.</p>
+<p class="meta">insufficient &middot; last 28 days</p>
+<p class="muted">A work-pattern observation, not a health assessment.</p>
+</section>
+<section class="card" id="spend">
+<div class="eyebrow" style="margin-bottom:12px;">Estimated spend</div>
+<div class="figure">$0.04<span class="est">estimate</span></div>
+<div class="ratecard">rate card bundled-2026-09-29 &middot; 4 sessions &middot; 14.2K tokens &middot; 74% served from cache</div>
+</section>
+<section class="card" id="usage">
+<div class="sec-head"><span class="eyebrow">Usage by tool and model</span><span class="meta">assistant turns &middot; est. cost</span></div>
+<table class="usage"><thead><tr>
+<th>Tool</th><th>Model</th><th class="n">Turns</th><th class="n">Input</th><th class="n">Cached</th><th class="n">Output</th><th class="n">Cost</th></tr></thead><tbody>
+<tr><td>claude_code</td><td class="model">claude-opus-4-1-20250805</td><td class="n">1</td><td class="n">25</td><td class="n">0</td><td class="n">64</td><td class="n">$0.0052</td></tr>
+<tr><td>claude_code</td><td class="model">claude-sonnet-4-20250514</td><td class="n">6</td><td class="n">1,455</td><td class="n">2,800</td><td class="n">1,375</td><td class="n">$0.0266</td></tr>
+<tr><td>codex</td><td class="model">gpt-5-codex</td><td class="n">2</td><td class="n">1,600</td><td class="n">6,000</td><td class="n">750</td><td class="n">$0.0103</td></tr>
+</tbody></table>
+<p class="muted num" style="font-size:12px;margin:14px 0 0;">sessions 4 &middot; assistant turns 9 &middot; tool calls 3 &middot; interruptions 2 &middot; retries 1</p>
+</section>
+<section class="card" id="sources">
+<div class="sec-head"><span class="eyebrow">Source health</span><span class="meta">all scanned logs</span></div>
+<div class="srcline"><span class="nm">claude_code_cli</span><span class="meta">21 seen - 16 parsed - 3 ignored - 1 malformed - 1 unrecognized - 1 unfamiliar fields</span><span class="tag emerging">format drift</span></div>
+<div class="srcline"><span class="nm">codex_cli</span><span class="meta">19 seen - 16 parsed - 1 ignored - 1 malformed - 1 unrecognized - 0 unfamiliar fields</span><span class="tag emerging">format drift</span></div>
+<p class="muted" style="font-size:12.5px;margin:12px 0 0;">Some records were not recognized. Parsing continued and skipped them safely; an agent update may be available. No log content was recorded.</p>
+</section>
+<div class="foot"><span>practicegraph &middot; generated 2026-07-02 18:00 UTC</span><span>all analysis local &middot; rate card bundled-2026-09-29 &middot; v0.2.29</span></div>
+</div>
+</body>
+</html>

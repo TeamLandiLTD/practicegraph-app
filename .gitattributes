@@ -1,0 +1,28 @@
+# Golden files and parser fixtures are byte-exact test artifacts (FR-RPT-3,
+# FR-SRC-8). Never let git translate their line endings.
+tests/goldens/** -text
+tests/fixtures/** -text
+
+# Shell scripts and macOS sources MUST stay LF even when checked out on
+# Windows — a CRLF shebang breaks bash on the Mac ("bash\r: bad interpreter"),
+# and Swift/plist tooling expects Unix newlines. Force LF regardless of the
+# committer's core.autocrlf.
+*.sh text eol=lf
+*.swift text eol=lf
+*.plist text eol=lf
+*.entitlements text eol=lf
+macos/** text eol=lf
+packaging/macos/** text eol=lf
+linux/** text eol=lf
+packaging/linux/** text eol=lf
+
+# Web assets must stay LF so Vite builds are byte-reproducible on Windows.
+ui/index.html text eol=lf
+webui/index.html text eol=lf
+
+# What is published is the explicit list in packaging/public-source-files.txt
+# (exported by tools/public_source.py), not export-ignore rules here: every
+# file in the public repository belongs in its source archive.
+
+# Retain verbatim upstream notice files, including original whitespace.
+packaging/third-party/*.txt -text -whitespace

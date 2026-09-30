@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# PracticeGraph installer, before the app is copied: stop the running copy.
+#
+# The engine is a separate process that outlives the window, so replacing the
+# bundle under a running app leaves the old engine answering the new window
+# (field report 2026-09-17, on Windows). Only processes whose command line
+# starts inside the install location are stopped — the window, its dashboard
+# server and a background refresh — never anything else, the same rule the
+# Windows installer follows. Your data lives outside the app and is untouched.
+#
+# Never fails the install: whatever happens here, the copy goes ahead.
+
+set -u
+APP="${PRACTICEGRAPH_INSTALL_APP:-/Applications/PracticeGraph.app}"
+# Anchored, with the path's regex metacharacters escaped: "^<app>/Contents/".
+PATTERN="^$(printf '%s' "$APP" | sed 's/[][\.*^$()+?{}|]/\\&/g')/Contents/"
+
+running() { /usr/bin/pgrep -f "$PATTERN"; }
+
+pids=$(running)
+if [ -z "$pids" ]; then
+    echo "PracticeGraph: no running copy to stop"
+    exit 0
+fi
+echo "PracticeGraph: stopping running copy:" $pids
+/usr/bin/pkill -TERM -f "$PATTERN"
+for _ in $(seq 1 20); do
+    sleep 0.5
+    [ -z "$(running)" ] && { echo "PracticeGraph: stopped"; exit 0; }
+done
+echo "PracticeGraph: still running after 10 s, forcing:" $(running)
+/usr/bin/pkill -KILL -f "$PATTERN"
+exit 0

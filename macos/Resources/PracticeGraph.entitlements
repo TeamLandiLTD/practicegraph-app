@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hardened-runtime entitlements for PracticeGraph.app.
+
+  Notarization requires the hardened runtime (codesign options: runtime).
+  This app is deliberately narrow: it is NOT sandboxed (it reads the user's
+  ~/.claude and ~/.codex logs and spawns the engine, both of which the App
+  Sandbox would block, and PracticeGraph ships outside the Mac App Store,
+  Developer-ID signed + notarized, where sandboxing is not required).
+
+  The two allowances below exist for one reason: the bundled analysis engine.
+  A PyInstaller/Nuitka onefile engine unpacks a private copy of the Python
+  runtime and dlopen()s it at launch; under the hardened runtime that requires
+  allowing an unsigned-by-Apple interpreter to load its own libraries and
+  (for some builds) JIT-less dynamic loading. If the engine is built fully
+  statically and signed with this same Developer ID, you can tighten this by
+  dropping disable-library-validation and re-notarizing; verify with a clean
+  `spctl -a -vvv` on a downloaded copy first.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- The engine (a separately-built binary embedding CPython) loads its own
+         libraries; allow it under our team signature. -->
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+
+    <!-- Some frozen-Python builds need writable/executable pages for the
+         unpacked interpreter. Kept because onefile engines commonly require
+         it; drop it if your engine build does not. -->
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+</dict>
+</plist>

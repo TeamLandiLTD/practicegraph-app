@@ -1,0 +1,11 @@
+# The image COPYs only pyproject.toml, README.md and the two src packages;
+# keep the rest of the repo out of the build context.
+*
+!pyproject.toml
+!README.md
+!LICENSE
+!NOTICE
+!src/practicegraph
+!src/practicegraph_server
+src/**/__pycache__
+src/*.egg-info

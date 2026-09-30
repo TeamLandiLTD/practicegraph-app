@@ -1,0 +1,32 @@
+name: Bug report
+description: Report a problem using synthetic or redacted evidence.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include session logs, tokens, databases, private paths, or prompts.
+        Report vulnerabilities privately using SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Version and operating system
+      placeholder: PracticeGraph version, Windows/macOS version
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What were you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Prefer a small synthetic example. No private activity logs.

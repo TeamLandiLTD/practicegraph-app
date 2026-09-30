@@ -1,0 +1,20 @@
+name: Idea or usability feedback
+description: Describe a useful improvement.
+body:
+  - type: textarea
+    id: task
+    attributes:
+      label: What were you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Context
+      description: Optional, without private activity or identifying information.

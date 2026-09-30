@@ -1,0 +1,62 @@
+PRACTICEGRAPH DAILY REPORT
+Local day: 2026-07-02 (UTC)
+UTC accounting day: 2026-07-02
+======================================================================
+
+WORK-PATTERN OBSERVATION
+Observation: insufficient
+Confidence: insufficient
+No repeated pattern yet
+The available history has not cleared a repeated-pattern sample gate.
+Period: last 28 days
+A work-pattern observation, not a health assessment.
+
+SPEND (estimates)
+  Estimated spend: $0.04
+  Basis: local token counts x rate card bundled-2026-09-29.
+  All figures are estimates, computed on this machine only.
+
+TREND (LAST 7 DAYS)
+    2026-06-26     $0.00         0 tokens     0 turns
+    2026-06-27     $0.00         0 tokens     0 turns
+    2026-06-28     $0.00         0 tokens     0 turns
+    2026-06-29     $0.00         0 tokens     0 turns
+    2026-06-30     $0.00         0 tokens     0 turns
+    2026-07-01     $0.00         0 tokens     0 turns
+  * 2026-07-02     $0.04     14.2K tokens     9 turns
+
+FOCUS (local only)
+  Longest uninterrupted block: 4 min
+  streak 4 min | concurrent 1 | switches 0 | bursts 1
+  tip: protect-a-deep-work-block
+
+PROFILE (all local history)
+  lifetime 14.2K tokens | $0.04 est. | 1 active days
+  peak day 2026-07-02 (14.2K tokens) | longest block 4 min
+
+RHYTHM (last 28 days, local only)
+  quiet-hours activity 0% | outside preferred hours 0% | off-schedule days 0% | deep-block days 0 | no-pause 2h+ days 0
+
+USAGE BY TOOL AND MODEL
+  tool          model                         turns      input     cached     output       cost
+  claude_code   claude-opus-4-1-20250805          1         25          0         64    $0.0052
+  claude_code   claude-sonnet-4-20250514          6      1,455      2,800      1,375    $0.0266
+  codex         gpt-5-codex                       2      1,600      6,000        750    $0.0103
+
+  Sessions: 4 | Assistant turns: 9 | Tool calls: 3 | Interruptions: 2 | Retries: 1
+
+SOURCE HEALTH (all scanned logs)
+  claude_code_cli (deep_session_log, parser v11)
+    records: 21 seen, 16 parsed, 3 ignored, 1 malformed, 1 unrecognized, 1 with unfamiliar fields
+    note: some records in this source's logs were not recognized.
+    Parsing continued and skipped them safely; an agent update may
+    be available. No log content was recorded.
+  codex_cli (deep_session_log, parser v13)
+    records: 19 seen, 16 parsed, 1 ignored, 1 malformed, 1 unrecognized, 0 with unfamiliar fields
+    note: some records in this source's logs were not recognized.
+    Parsing continued and skipped them safely; an agent update may
+    be available. No log content was recorded.
+
+STATUS
+  All analysis ran locally on this machine. Nothing left this machine.
+  Generated 2026-07-02 18:00 UTC | PracticeGraph 0.2.29 | rate card bundled-2026-09-29

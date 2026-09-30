@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PracticeGraph fleet dashboard - acme-eng</title>
+<style>
+:root {
+  --paper-0:#fcfbf8; --paper-50:#f6f3ec; --paper-100:#efe9df; --paper-200:#e3dccd;
+  --ink-900:#181d1b; --ink-800:#232b28; --ink-700:#39423d; --ink-600:#55605a;
+  --ink-500:#727d76; --ink-400:#97a09a;
+  --teal-900:#0f3730; --teal-800:#15473d; --teal-700:#1b574b; --teal-600:#226c5f;
+  --teal-500:#2f8576; --teal-400:#4ea191; --teal-300:#82bcae; --teal-200:#b6d8cf;
+  --teal-100:#dbece7; --teal-50:#ecf4f1;
+  --sage-500:#738069; --sage-200:#cdd4c2; --sage-100:#e4e8dc;
+  --positive-600:#2f7d57; --positive-100:#dcefe2;
+  --caution-600:#a9761b; --caution-100:#f4e7cc;
+  --critical-600:#b04a30;
+  --suppressed-fg:#8d958f; --suppressed-bg:#efece4; --suppressed-line:#cdc7ba;
+  --border-hair:#e7e0d3; --border-soft:#d8cfbd;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:Georgia,"Iowan Old Style","Times New Roman",Times,serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --r-sm:6px; --r-md:10px; --r-lg:14px; --r-pill:999px;
+  --sh-sm:0 1px 3px rgba(24,40,35,.06),0 1px 2px rgba(24,40,35,.04);
+  --sh-md:0 4px 12px rgba(24,40,35,.07),0 1px 3px rgba(24,40,35,.05);
+}
+* { box-sizing:border-box; }
+html,body { margin:0; }
+body {
+  font-family:var(--sans); background:var(--paper-0); color:var(--ink-700);
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+.num { font-family:var(--mono); font-variant-numeric:tabular-nums lining-nums;
+       font-feature-settings:"tnum" 1,"lnum" 1; }
+.eyebrow { font-size:11.5px; font-weight:600; letter-spacing:.08em;
+           text-transform:uppercase; color:var(--ink-500); }
+.card { background:#fff; border:1px solid var(--border-hair); border-radius:var(--r-lg);
+        box-shadow:var(--sh-sm); padding:22px 24px; }
+.grid { display:grid; gap:18px; }
+.g-2 { grid-template-columns:1fr 1fr; }
+.g-3 { grid-template-columns:repeat(3,1fr); }
+.muted { color:var(--ink-500); }
+.lede { font-family:var(--serif); font-style:italic; font-size:16px;
+        color:var(--ink-700); line-height:1.5; }
+.sec-head { display:flex; align-items:baseline; justify-content:space-between;
+            margin-bottom:16px; gap:12px; }
+.sec-head .meta { font-family:var(--mono); font-size:11px; color:var(--ink-400); }
+.est { display:inline-block; vertical-align:middle; margin-left:10px;
+       font-family:var(--sans); font-size:11px; font-weight:600; color:var(--ink-400);
+       border:1px solid var(--border-soft); border-radius:var(--r-pill); padding:2px 8px; }
+.tag { font-size:11px; font-weight:600; padding:2px 8px; border-radius:var(--r-pill); }
+.tag.steady { background:var(--positive-100); color:var(--positive-600); }
+.tag.emerging { background:var(--caution-100); color:var(--caution-600); }
+.tag.leading { background:var(--teal-100); color:var(--teal-800); }
+.tag.quiet { background:var(--suppressed-bg); color:var(--suppressed-fg); }
+.trust { display:inline-flex; align-items:center; gap:8px; padding:8px 14px;
+         border-radius:var(--r-pill); background:var(--teal-50);
+         border:1px solid var(--teal-200); color:var(--teal-800);
+         font-size:12.5px; font-weight:600; white-space:nowrap; }
+.trust svg { width:15px; height:15px; }
+.suppressed-panel { display:flex; gap:12px; align-items:flex-start; padding:16px 18px;
+  border-radius:var(--r-lg); background:var(--suppressed-bg);
+  background-image:repeating-linear-gradient(45deg,transparent,transparent 7px,
+    rgba(141,149,143,.12) 7px,rgba(141,149,143,.12) 8px);
+  border:1px dashed var(--suppressed-line); color:var(--suppressed-fg); }
+.suppressed-panel svg { flex:none; margin-top:1px; width:20px; height:20px; }
+.suppressed-panel .t { font-size:14px; font-weight:600; color:var(--ink-700);
+                       margin-bottom:3px; }
+.suppressed-panel .d { font-size:13px; line-height:1.45; }
+.suppressed-panel .m { font-family:var(--mono); font-size:11.5px; margin-top:7px; }
+.foot { margin-top:28px; padding-top:18px; border-top:1px solid var(--border-hair);
+        display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+        font-size:12px; color:var(--ink-400); font-family:var(--mono); }
+
+.wrap { max-width:1100px; margin:0 auto; padding:28px 32px 72px; }
+/* Live bar: idle grey dot + "as of" when static; a green breathing dot +
+   "refreshing every Ns" when live (meta-refresh, no script). */
+.livebar { display:inline-flex; align-items:center; gap:8px; margin:2px 0 18px;
+           font-family:var(--mono); font-size:11.5px; color:var(--ink-500); }
+.livebar a { color:var(--teal-700); text-decoration:none;
+             border-bottom:1px solid transparent; }
+.livebar a:hover { border-bottom-color:var(--teal-700); }
+.livebar .livedot { width:8px; height:8px; border-radius:50%;
+                    background:var(--ink-400); flex:none; }
+.livebar.on { color:var(--positive-600); }
+.livebar.on .livedot { background:var(--positive-600);
+                       box-shadow:0 0 0 0 rgba(47,125,87,.5);
+                       animation:livepulse 2.2s ease-out infinite; }
+@keyframes livepulse {
+  0% { box-shadow:0 0 0 0 rgba(47,125,87,.45); }
+  70% { box-shadow:0 0 0 7px rgba(47,125,87,0); }
+  100% { box-shadow:0 0 0 0 rgba(47,125,87,0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .livebar.on .livedot { animation:none; }
+}
+header.top { display:flex; align-items:center; gap:14px; margin-bottom:6px; }
+.mark { width:38px; height:38px; border-radius:10px; background:var(--teal-600);
+        display:flex; align-items:center; justify-content:center; flex:none; }
+.brand { display:flex; flex-direction:column; gap:1px; }
+.brand .name { font-weight:700; font-size:16px; color:var(--ink-900);
+               letter-spacing:-.01em; }
+.brand .name b { color:var(--teal-700); font-weight:700; }
+.brand .sub { font-size:12.5px; color:var(--ink-500); }
+header.top .trust { margin-left:auto; }
+h1 { font-family:var(--sans); font-size:30px; font-weight:800;
+     letter-spacing:-.015em; color:var(--ink-900); margin:14px 0 0; }
+p.pagesub { font-size:14px; color:var(--ink-600); margin:4px 0 26px; }
+p.pagesub .ctx { color:var(--ink-400); }
+p.pagesub a { color:var(--teal-700); font-weight:600; text-decoration:none;
+              border-bottom:1px solid var(--teal-200); }
+.driftsplit { font-family:var(--mono); font-size:10.5px; color:var(--ink-400);
+              white-space:nowrap; margin-top:2px; }
+.onboard .step { margin-top:12px; }
+.onboard .step .t { font-size:13.5px; font-weight:600; color:var(--ink-800); }
+.onboard code { display:block; font-family:var(--mono); font-size:12px;
+                color:var(--ink-700); background:var(--paper-50);
+                border:1px solid var(--border-hair); border-radius:var(--r-sm);
+                padding:8px 10px; margin-top:6px; overflow-x:auto; }
+.stack { display:flex; flex-direction:column; gap:20px; }
+.herostrip { display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr; gap:24px;
+             align-items:center; }
+.herostrip > div + div { border-left:1px solid var(--border-hair); padding-left:24px; }
+.stat .v { font-family:var(--mono); font-variant-numeric:tabular-nums;
+           font-weight:600; color:var(--ink-900); }
+.stat .v.hero { font-size:44px; letter-spacing:-.02em; line-height:1.05; }
+.stat .v.lg { font-size:26px; }
+.stat .l { font-size:11.5px; font-weight:600; letter-spacing:.08em;
+           text-transform:uppercase; color:var(--ink-500); margin-bottom:7px; }
+.stat .c { font-size:12.5px; color:var(--ink-500); margin-top:5px; }
+.estnote { margin-top:18px; padding-top:14px; border-top:1px solid var(--border-hair);
+           font-size:11.5px; color:var(--ink-400); display:flex; align-items:center;
+           gap:8px; }
+.estnote .pill { font-weight:600; color:var(--ink-500);
+                 border:1px solid var(--border-soft); border-radius:var(--r-pill);
+                 padding:0 6px; font-size:10px; }
+.answers { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.answer { display:flex; flex-direction:column; gap:12px; border-top:3px solid
+          var(--teal-600); }
+.answer.positive { border-top-color:var(--positive-600); }
+.answer.caution { border-top-color:var(--caution-600); }
+.answer .eyebrow.pos { color:var(--positive-600); }
+.answer .eyebrow.cau { color:var(--caution-600); }
+.answer .eyebrow.tea { color:var(--teal-700); }
+.answer .serif { font-family:var(--serif); font-style:italic; font-size:15px;
+                 color:var(--ink-700); line-height:1.4; }
+table.days { border-collapse:collapse; width:100%; font-size:13.5px; }
+table.days th { text-align:left; font-size:11.5px; font-weight:600;
+                letter-spacing:.08em; text-transform:uppercase; color:var(--ink-500);
+                padding:0 10px 10px 0; }
+table.days td { padding:10px 10px 10px 0; border-top:1px solid var(--border-hair);
+                color:var(--ink-800); vertical-align:top; }
+table.days th.n, table.days td.n { text-align:right; font-family:var(--mono);
+  font-variant-numeric:tabular-nums; }
+table.days td.day { font-family:var(--mono); font-size:12.5px;
+                    color:var(--ink-600); white-space:nowrap; }
+table.days td.nodata { color:var(--ink-400); }
+.brk { display:flex; flex-direction:column; gap:11px; }
+.brkrow { display:grid; grid-template-columns:130px 1fr auto auto; gap:12px;
+          align-items:center; }
+.brkrow .lab { font-size:13.5px; font-weight:600; color:var(--ink-800); }
+.brkrow .track { height:9px; background:var(--paper-100);
+                 border-radius:var(--r-pill); overflow:hidden; }
+.brkrow .fill { display:block; height:100%; background:var(--teal-500);
+                border-radius:var(--r-pill); }
+.brkrow .val { font-family:var(--mono); font-variant-numeric:tabular-nums;
+               font-size:13px; font-weight:600; color:var(--ink-900); }
+.brkrow .pct { font-family:var(--mono); font-size:11.5px; color:var(--ink-500);
+               width:38px; text-align:right; }
+svg.spend .axis { stroke:var(--border-hair); stroke-width:1; }
+svg.spend text { font-family:var(--mono); font-size:10px; fill:var(--ink-400); }
+.legend { display:flex; flex-wrap:wrap; gap:14px; margin-top:12px; }
+.legend span { display:inline-flex; align-items:center; gap:6px; font-size:12px;
+               color:var(--ink-600); }
+.legend i { width:10px; height:10px; border-radius:3px; display:inline-block; }
+@media (max-width:860px){ .herostrip,.answers { grid-template-columns:1fr; }
+  .herostrip > div + div { border-left:none; padding-left:0; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><span class="mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true"><rect x="3" y="11.5" width="3" height="5" rx="1" fill="#dbece7"></rect><rect x="9.5" y="8" width="3" height="8.5" rx="1" fill="#82bcae"></rect><rect x="16" y="4.5" width="3" height="12" rx="1" fill="#f3f8f6"></rect></svg></span><span class="brand"><span class="name">practice<b>graph</b> fleet</span><span class="sub">Org: acme-eng</span></span><span class="trust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg> fleet aggregates only - nothing personal</span></header>
+<h1>Fleet spend &amp; adoption</h1>
+<p class="pagesub">The 10-second read: value, waste, and who is adopting. <span class="ctx">&middot; 2026-06-30 to 2026-07-02 (UTC) &middot; k-anonymity threshold 2 &middot; no person-level data exists behind this page &middot; window <a href="?days=7">7</a> / <a href="?days=30">30</a> / <a href="?days=90">90</a> days</span></p>
+<div class="livebar"><span class="livedot" aria-hidden="true"></span><span>as of load &middot; 2026-07-02 18:00 UTC &middot; <a href="?days=3&amp;live=15">go live</a></span></div>
+<div class="stack">
+<div class="card"><div class="herostrip"><div class="stat"><div class="l">Estimated fleet spend</div><div class="v hero">$0.08<span class="est">estimate</span></div><div class="c">across 1 displayable day(s)</div></div><div class="stat"><div class="l">Token volume</div><div class="v lg">29.1K</div><div class="c">74% served from cache</div></div><div class="stat"><div class="l">Assistant turns</div><div class="v lg">18</div><div class="c">aggregated fleet-wide</div></div><div class="stat"><div class="l">Peak daily contributors</div><div class="v lg">2</div><div class="c">k-anonymity threshold &gt;= 2</div></div></div><div class="estnote"><span class="pill">est.</span>costs estimated on endpoints from local token counts and versioned rate cards - no raw data reaches this server</div></div>
+<div class="answers"><div class="card answer positive"><div class="eyebrow pos">Value - are we getting it?</div><div class="stat"><div class="v lg">74%</div><div class="c">cache efficiency</div></div><p class="serif">Most context is being reused, not re-billed - the fleet is getting more done per dollar.</p></div><div class="card answer caution"><div class="eyebrow cau">Waste - where is it?</div><div class="stat"><div class="v lg">12%</div><div class="c">of estimated spend on premium models</div></div><p class="serif">Premium models are a small share of estimated spend - routing discipline is holding.</p></div><div class="card answer teal"><div class="eyebrow tea">Adoption - is it maturing?</div><div class="stat"><div class="v lg">2</div><div class="c">peak daily contributors - 2 tool(s) observed</div></div><p class="serif">Only one released day so far - trend reads need more days above the threshold.</p></div></div>
+<section class="card">
+<div class="sec-head"><span class="eyebrow">Estimated spend over time</span><span class="meta">stacked by model family &middot; est.</span></div>
+<svg class="spend" viewBox="0 0 1040 190" role="img" aria-label="Daily estimated fleet spend, stacked by model family" width="100%" height="190"><line class="axis" x1="0" y1="160" x2="1040" y2="160"></line><text x="173" y="174" text-anchor="middle">06-30</text><text x="519" y="174" text-anchor="middle">07-01</text><rect x="351" y="150" width="336" height="10" rx="2" fill="#efece4" stroke="#cdc7ba" stroke-dasharray="3 2"></rect><text x="865" y="174" text-anchor="middle">07-02</text><rect x="697" y="143" width="336" height="17" rx="2" fill="#1b574b"></rect><rect x="697" y="51" width="336" height="92" rx="2" fill="#2f8576"></rect><rect x="697" y="16" width="336" height="35" rx="2" fill="#738069"></rect></svg><div class="legend"><span><i style="background:#1b574b"></i>claude_opus</span><span><i style="background:#2f8576"></i>claude_sonnet</span><span><i style="background:#738069"></i>gpt_5_codex</span><span><i style="background:#efece4;border:1px dashed #cdc7ba"></i>withheld (below k)</span></div>
+<p class="muted" style="font-size:12.5px;margin:14px 0 0;">Hatched slots mark days below the k-anonymity threshold: their values are unavailable by design, never zero.</p>
+</section>
+<section class="card">
+<div class="sec-head"><span class="eyebrow">Days</span><span class="meta">k &gt;= 2</span></div>
+<table class="days"><thead><tr>
+<th>Day</th><th class="n">Contributors</th><th class="n">Est. spend</th><th class="n">Assistant turns</th><th class="n">Sessions</th><th>Tool coverage</th><th class="n">Drift</th></tr></thead><tbody>
+<tr><td class="day">2026-06-30</td><td class="nodata" colspan="6">no data</td></tr>
+<tr><td class="day">2026-07-01</td><td colspan="6" style="padding-right:0;"><div class="suppressed-panel" style="padding:12px 14px;"><div><div class="t">Insufficient contributors</div><div class="d">unavailable (below k-anonymity threshold) - withheld, not zero.</div><div class="m">needs &gt;= 2 contributors</div></div></div></td></tr>
+<tr><td class="day">2026-07-02</td><td class="n">2</td><td class="n">$0.08</td><td class="n">18</td><td class="n">8</td><td>claude_code: 2, codex: 2</td><td class="n">10<div class="driftsplit">malformed 4 &middot; unknown field 2 &middot; unsupported 4</div></td></tr>
+</tbody></table>
+</section>
+<div class="card"><div class="sec-head"><span class="eyebrow">Coverage</span><span class="meta">latest released day 2026-07-02 &middot; k &gt;= 2</span></div><div class="brk"><div class="brkrow" style="grid-template-columns:1fr auto;"><span class="lab" style="font-weight:500;color:var(--ink-600);">claude_code</span><span class="val">2 contributor(s)</span></div><div class="brkrow" style="grid-template-columns:1fr auto;"><span class="lab" style="font-weight:500;color:var(--ink-600);">codex</span><span class="val">2 contributor(s)</span></div></div><p class="muted" style="font-size:12.5px;margin:14px 0 0;">2 of 2 supported source(s) detected across released days. Adoption: peak released day 2 contributor(s) - latest released day 2 contributor(s). Aggregates only: adoption is read from cohort counters, never from individuals.</p></div>
+<div class="grid g-2" style="display:grid;gap:20px;
+grid-template-columns:1fr 1fr;">
+<div class="card"><div class="sec-head"><span class="eyebrow">By model family</span><span class="meta">est. $ &middot; share</span></div><div class="brk"><div class="brkrow"><span class="lab">claude_sonnet</span><span class="track"><span class="fill" style="width:63%"></span></span><span class="val">$0.05</span><span class="pct">63%</span></div><div class="brkrow"><span class="lab">gpt_5_codex</span><span class="track"><span class="fill" style="width:24%"></span></span><span class="val">$0.02</span><span class="pct">24%</span></div><div class="brkrow"><span class="lab">claude_opus</span><span class="track"><span class="fill" style="width:12%"></span></span><span class="val">$0.01</span><span class="pct">12%</span></div></div></div>
+<div class="card"><div class="sec-head"><span class="eyebrow">Engagement (window)</span><span class="meta">closed counters</span></div><div class="brk"><div class="brkrow" style="grid-template-columns:1fr auto;"><span class="lab" style="font-weight:500;color:var(--ink-600);">report_generated</span><span class="val">2</span></div><div class="brkrow" style="grid-template-columns:1fr auto;"><span class="lab" style="font-weight:500;color:var(--ink-600);">tip_shown</span><span class="val">0</span></div><div class="brkrow" style="grid-template-columns:1fr auto;"><span class="lab" style="font-weight:500;color:var(--ink-600);">tip_acted</span><span class="val">0</span></div><div class="brkrow" style="grid-template-columns:1fr auto;"><span class="lab" style="font-weight:500;color:var(--ink-600);">recommendation_dismissed</span><span class="val">0</span></div><div class="brkrow" style="grid-template-columns:1fr auto;"><span class="lab" style="font-weight:500;color:var(--ink-600);">recommendation_never_suggest</span><span class="val">0</span></div><div class="brkrow" style="grid-template-columns:1fr auto;"><span class="lab" style="font-weight:500;color:var(--ink-600);">engagement_unavailable</span><span class="val">0</span></div></div></div>
+</div>
+<div style="display:grid;gap:20px;grid-template-columns:1fr 1fr;">
+<div class="card"><div class="sec-head"><span class="eyebrow">Where fleet sessions went</span><span class="meta">by work type &middot; structural</span></div><div class="brk"><div class="brkrow"><span class="lab">Build</span><span class="track"><span class="fill" style="width:25%"></span></span><span class="val">2</span><span class="pct">25%</span></div><div class="brkrow"><span class="lab">Investigate</span><span class="track"><span class="fill" style="width:25%"></span></span><span class="val">2</span><span class="pct">25%</span></div><div class="brkrow"><span class="lab">Converse</span><span class="track"><span class="fill" style="width:50%"></span></span><span class="val">4</span><span class="pct">50%</span></div></div><p class="muted" style="font-size:12.5px;margin:14px 0 0;">Classified on endpoints from event structure only - never from content.</p></div><div class="card"><div class="sec-head"><span class="eyebrow">Maturity distribution</span><span class="meta">contributor-days &middot; k &gt;= 2</span></div><div class="brk"><div class="brkrow" style="grid-template-columns:150px 1fr auto;"><span class="lab">Cache reuse</span><span class="track" style="height:12px;white-space:nowrap;font-size:0;"><span style="display:inline-block;height:100%;width:100%;background:#226c5f"></span></span><span class="val">2</span></div><div class="brkrow" style="grid-template-columns:150px 1fr auto;"><span class="lab">Tool usage</span><span class="track" style="height:12px;white-space:nowrap;font-size:0;"><span style="display:inline-block;height:100%;width:100%;background:#4ea191"></span></span><span class="val">2</span></div><div class="brkrow" style="grid-template-columns:150px 1fr auto;"><span class="lab">Multi-tool breadth</span><span class="track" style="height:12px;white-space:nowrap;font-size:0;"><span style="display:inline-block;height:100%;width:100%;background:#226c5f"></span></span><span class="val">2</span></div><div class="brkrow" style="grid-template-columns:150px 1fr auto;"><span class="lab">Consistency</span><span class="track" style="height:12px;white-space:nowrap;font-size:0;"><span style="display:inline-block;height:100%;width:100%;background:#b9a06a"></span></span><span class="val">2</span></div></div><div class="legend"><span><i style="background:#d8d2c6"></i>not yet</span><span><i style="background:#b9a06a"></i>emerging</span><span><i style="background:#4ea191"></i>developing</span><span><i style="background:#226c5f"></i>leading</span></div></div>
+</div>
+</div>
+<div class="foot"><span>aggregates only &middot; suppression is honest (unavailable, never zero)</span><span>generated 2026-07-02 18:00 UTC &middot; practicegraph server v0.1.0</span></div>
+</div>
+</body>
+</html>

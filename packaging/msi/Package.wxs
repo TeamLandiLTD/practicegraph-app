@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Per-user Apache-2.0 application: tray scheduler, private local store.
+     Machine-wide collection is retired. Optional EngineBundle changes delivery
+     format only. The finish dialog launches the tray in the installing user's
+     context; quiet installations never execute that UI action. -->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+<?ifdef $(var.MachineInstall) ?>
+  <?error Machine-wide personal collection is retired; build per-user. ?>
+  <?define InstallScope = "perMachine" ?>
+<?else?>
+  <?define InstallScope = "perUser" ?>
+<?endif?>
+
+  <Package Name="PracticeGraph"
+           Manufacturer="PracticeGraph"
+           Version="$(var.Version)"
+           UpgradeCode="8b1c6f2a-9d34-4e5b-a7c0-52d1e8f0b9a1"
+           Scope="$(var.InstallScope)"
+           Compressed="yes">
+
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="A newer version of PracticeGraph is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="PGIcon.ico" SourceFile="$(var.StageDir)\practicegraph.ico" />
+    <Property Id="ARPPRODUCTICON" Value="PGIcon.ico" />
+    <!-- ARPNOMODIFY=1 comes with WixUI_Minimal (no Change/Modify support). -->
+    <Property Id="ARPCOMMENTS"
+              Value="Local AI-usage analysis. All raw data stays on this machine; org sharing is opt-in and anonymous." />
+    <Property Id="ARPCONTACT" Value="PracticeGraph maintainers" />
+    <!-- Help link: the product site. -->
+    <Property Id="ARPHELPLINK" Value="https://practicegraph.dev" />
+
+    <!-- Interactive setup: stock license -> install -> finish dialogs, all
+         native tables. Silent/zero-touch installs (/qn) never see them. -->
+    <WixVariable Id="WixUILicenseRtf" Value="$(sys.SOURCEFILEDIR)LICENSE.rtf" />
+    <UI>
+      <ui:WixUI Id="WixUI_Minimal" />
+      <Publish Dialog="ExitDialog"
+               Control="Finish"
+               Event="DoAction"
+               Value="LaunchPracticeGraph"
+               Condition="WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 AND NOT Installed" />
+    </UI>
+    <Property Id="WIXUI_EXITDIALOGOPTIONALTEXT"
+              Value="PracticeGraph starts with Windows for your account. Open it from the Start Menu." />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch PracticeGraph" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <!-- The interactive final-page option invokes the same tray launch as the
+         Start Menu shortcut. It stays out of execution sequences, so quiet
+         deployments never start a user dashboard. -->
+    <CustomAction Id="LaunchPracticeGraph"
+                  FileRef="ShellExeFile"
+                  ExeCommand="tray"
+                  Execute="immediate"
+                  Impersonate="yes"
+                  Return="asyncNoWait" />
+    <!-- Stop our own running processes before files are validated.
+
+         Field report 2026-09-17: 0.2.19 was installed and the window was still
+         served by a 0.1.31 engine. Restart Manager cannot close a windowless
+         background process, so the locked interpreter, its DLLs and the
+         running shell stayed OLD on disk until a reboot - and the old shell
+         never asks for a new engine. The NEW shell runs from the installer's
+         own embedded copy (the installed one may be the very file that is
+         locked) and ends only processes whose image lives under INSTALLFOLDER;
+         it targets by path, never by name, so no other Python is touched. A
+         failure never blocks the install. -->
+    <Binary Id="StopRunningShell" SourceFile="$(var.StageDir)\practicegraph-shell.exe" />
+    <CustomAction Id="StopRunningPracticeGraph"
+                  BinaryRef="StopRunningShell"
+                  ExeCommand="stop-running &quot;[INSTALLFOLDER]&quot;"
+                  Execute="immediate"
+                  Impersonate="yes"
+                  Return="ignore" />
+    <InstallExecuteSequence>
+      <Custom Action="StopRunningPracticeGraph" Before="InstallValidate" />
+    </InstallExecuteSequence>
+    <!-- Zero-touch provisioning properties (FR-DEP-2). -->
+    <Property Id="API_BASE_URL" Secure="yes" />
+    <Property Id="ORG_ID" Secure="yes" />
+    <Property Id="ORG_TOKEN" Hidden="yes" Secure="yes" />
+<?ifdef $(var.MachineInstall) ?>
+    <!-- Feeds REMOVE_DATA=1 for the shared %ProgramData% store, which only
+         exists in this flavour. A read needs no rights, but carrying a
+         property that can never be satisfied invites someone to wire it up. -->
+    <Property Id="PGDATA">
+      <RegistrySearch Id="PGDataSearch" Root="HKLM" Key="SOFTWARE\PracticeGraph"
+                      Name="DataDir" Type="raw" />
+    </Property>
+<?endif?>
+
+<?ifdef $(var.MachineInstall) ?>
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="PracticeGraph">
+<?ifndef $(var.EngineBundle) ?>
+        <Directory Id="RuntimeFolder" Name="runtime" />
+        <Directory Id="AppFolder" Name="app" />
+<?endif?>
+        <Directory Id="WebUiFolder" Name="webui" />
+      </Directory>
+    </StandardDirectory>
+    <!-- Shared store, and the reason it needs an explicit DACL below. -->
+    <StandardDirectory Id="CommonAppDataFolder">
+      <Directory Id="DataFolder" Name="PracticeGraph" />
+    </StandardDirectory>
+<?else?>
+    <!-- Per-user: everything inside the profile, so nothing here needs admin
+         and nothing lands where another user can read it. The data directory
+         is NOT created by the installer - the core creates %LOCALAPPDATA%\
+         PracticeGraph itself on first run (config.default_data_dir), which is
+         also where the CLI has always put it. -->
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="ProgramsFolder" Name="Programs">
+        <Directory Id="INSTALLFOLDER" Name="PracticeGraph">
+<?ifndef $(var.EngineBundle) ?>
+          <Directory Id="RuntimeFolder" Name="runtime" />
+          <Directory Id="AppFolder" Name="app" />
+<?endif?>
+          <Directory Id="WebUiFolder" Name="webui" />
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+<?endif?>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="MenuFolder" Name="PracticeGraph" />
+    </StandardDirectory>
+
+    <ComponentGroup Id="ShellComponents" Directory="INSTALLFOLDER">
+      <Component Id="ShellExe">
+        <File Id="ShellExeFile" Source="$(var.StageDir)\practicegraph-shell.exe"
+              KeyPath="yes" />
+<?ifdef $(var.MachineInstall) ?>
+        <!-- FR-DEP-1: delayed auto start, LocalSystem, native tables only.
+             MACHINE FLAVOUR ONLY. In a per-user install there is no service at
+             all - the tray runs the same tick, because the agent derives from
+             log files it re-reads with cursors, so a tray that was closed costs
+             a delay and never data. -->
+        <ServiceInstall Id="AgentService"
+                        Name="PracticeGraphAgent"
+                        DisplayName="PracticeGraph Agent"
+                        Description="Local AI-usage analysis. All raw data stays on this machine; org sharing is opt-in and anonymous."
+                        Start="auto"
+                        Type="ownProcess"
+                        ErrorControl="normal"
+                        Account="LocalSystem"
+                        Arguments="service run"
+                        Vital="yes">
+          <ServiceConfig DelayedAutoStart="yes" OnInstall="yes" OnReinstall="yes" />
+          <util:ServiceConfig FirstFailureActionType="restart"
+                              SecondFailureActionType="restart"
+                              ThirdFailureActionType="none"
+                              RestartServiceDelayInSeconds="60" />
+        </ServiceInstall>
+        <ServiceControl Id="AgentServiceControl" Name="PracticeGraphAgent"
+                        Start="install" Stop="both" Remove="uninstall" Wait="yes" />
+<?endif?>
+      </Component>
+
+      <!-- The gnu-built shell links WebView2Loader.dll at load time (native
+           dashboard window): it must sit beside the exe in EVERY flavor or
+           the shell - service included - cannot start at all. -->
+      <Component Id="WebView2LoaderDll">
+        <File Source="$(var.StageDir)\WebView2Loader.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="ShellIcon">
+        <File Source="$(var.StageDir)\practicegraph.ico" KeyPath="yes" />
+      </Component>
+      <Component Id="ShellIconWorking">
+        <File Source="$(var.StageDir)\practicegraph-working.ico" KeyPath="yes" />
+      </Component>
+      <Component Id="CliShim">
+        <File Source="$(var.StageDir)\practicegraph.cmd" KeyPath="yes" />
+      </Component>
+      <Component Id="BuildInfo">
+        <File Source="$(var.StageDir)\BUILD-INFO.txt" KeyPath="yes" />
+      </Component>
+      <Component Id="OpenSourceLicense">
+        <File Source="$(var.StageDir)\LICENSE" KeyPath="yes" />
+      </Component>
+      <Component Id="OpenSourceNotice">
+        <File Source="$(var.StageDir)\NOTICE" KeyPath="yes" />
+      </Component>
+      <Component Id="ThirdPartyNotices">
+        <File Source="$(var.StageDir)\THIRD_PARTY_NOTICES.txt" KeyPath="yes" />
+      </Component>
+
+      <!-- Per-user tray at logon for every user (FR-DEP-1). HKMU resolves to
+           HKLM in this per-machine package. The silent flag makes signing in
+           bring up the tray icon only, never a dashboard window (that is
+           reserved for a user-initiated launch via the Start-menu shortcut). -->
+      <Component Id="TrayAutostart">
+        <RegistryValue Root="HKMU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+                       Name="PracticeGraphTray" Type="string"
+                       Value="&quot;[INSTALLFOLDER]practicegraph-shell.exe&quot; tray --silent"
+                       KeyPath="yes" />
+      </Component>
+
+      <!-- Toast + report-link activation (C-5): practicegraph: protocol.
+           The %1 carries a closed verb (timer-focus, timer-break,
+           open-privacy, open-report); the shell ignores anything else.
+
+           HKMU, not HKLM: it resolves to HKCU in the per-user package and
+           HKLM in the machine one. Registering a protocol handler under
+           HKEY_CLASSES_ROOT proper needs administrator rights, so a per-user
+           install died here on a clean machine with "Could not write value
+           URL Protocol" (2026-07-27). Per-user handlers under
+           HKCU\Software\Classes are first-class on Windows and win over the
+           machine entry for that user, which is the behaviour we want anyway. -->
+      <Component Id="ProtocolHandler">
+        <RegistryKey Root="HKMU" Key="SOFTWARE\Classes\practicegraph">
+          <RegistryValue Type="string" Value="URL:PracticeGraph" />
+          <RegistryValue Name="URL Protocol" Type="string" Value="" KeyPath="yes" />
+          <RegistryKey Key="shell\open\command">
+            <RegistryValue Type="string"
+                           Value="&quot;[INSTALLFOLDER]practicegraph-shell.exe&quot; url &quot;%1&quot;" />
+          </RegistryKey>
+        </RegistryKey>
+      </Component>
+
+<?ifdef $(var.MachineInstall) ?>
+      <!-- Service lifecycle events land in the Application log. MACHINE ONLY,
+           for two reasons: registering an event source writes
+           HKLM\SYSTEM\CurrentControlSet\Services\EventLog, which a per-user
+           install has no rights to - it would have failed exactly like the
+           protocol handler above, one component later - and there is no
+           service in that flavour whose lifecycle it could report. -->
+      <Component Id="EventSource">
+        <util:EventSource Log="Application" Name="PracticeGraph"
+                          EventMessageFile="[System64Folder]EventCreate.exe"
+                          SupportsErrors="yes" SupportsInformationals="yes"
+                          SupportsWarnings="yes" KeyPath="yes" />
+      </Component>
+<?endif?>
+    </ComponentGroup>
+
+<?ifdef $(var.MachineInstall) ?>
+    <!-- MACHINE FLAVOUR ONLY. Zero-touch org provisioning writes HKLM, and the
+         shared %ProgramData% store with its explicit DACL only exists here. A
+         per-user install has neither: its data sits in the profile, where the
+         profile's own permissions are the whole story. -->
+    <ComponentGroup Id="ProvisioningComponents" Directory="INSTALLFOLDER">
+      <!-- The bootstrap key is readable by SYSTEM/Administrators only
+           (NFR-SEC-1); the agent's first tick consumes and clears the token. -->
+      <Component Id="BootstrapKey">
+        <RegistryKey Root="HKLM" Key="SOFTWARE\PracticeGraph\Bootstrap"
+                     ForceCreateOnInstall="yes">
+          <util:PermissionEx User="SYSTEM" GenericAll="yes" />
+          <util:PermissionEx User="Administrators" GenericAll="yes" />
+        </RegistryKey>
+        <RegistryValue Root="HKLM" Key="SOFTWARE\PracticeGraph" Name="DataDir"
+                       Type="string" Value="[DataFolder]" KeyPath="yes" />
+      </Component>
+      <Component Id="BootstrapApiBaseUrl" Condition="API_BASE_URL">
+        <RegistryValue Root="HKLM" Key="SOFTWARE\PracticeGraph\Bootstrap"
+                       Name="api_base_url" Type="string" Value="[API_BASE_URL]"
+                       KeyPath="yes" />
+      </Component>
+      <Component Id="BootstrapOrgId" Condition="ORG_ID">
+        <RegistryValue Root="HKLM" Key="SOFTWARE\PracticeGraph\Bootstrap"
+                       Name="org_id" Type="string" Value="[ORG_ID]" KeyPath="yes" />
+      </Component>
+      <Component Id="BootstrapOrgToken" Condition="ORG_TOKEN">
+        <RegistryValue Root="HKLM" Key="SOFTWARE\PracticeGraph\Bootstrap"
+                       Name="org_token" Type="string" Value="[ORG_TOKEN]"
+                       KeyPath="yes" />
+      </Component>
+
+      <!-- Data survives uninstall unless REMOVE_DATA=1 (FR-DEP-3). Explicit
+           GUID: a directory keypath cannot use an auto-generated one.
+
+           %ProgramData%\PracticeGraph would otherwise inherit the default
+           %ProgramData% ACL, which grants BUILTIN\Users read (and create) on
+           everything inside — so a second local user could read the store, the
+           session token, and the org token. <Permission> sets an EXPLICIT,
+           protected DACL (inheritance dropped): SYSTEM/Administrators full, and
+           Users only the read/write/execute the per-user tray needs to operate
+           the shared machine store. The two secret files (org_token.bin, ui.json)
+           are locked tighter still at runtime — to their owner alone — by
+           winsec.restrict_to_owner_and_admins, independent of this folder ACL. -->
+      <Component Id="DataDirComponent" Directory="DataFolder"
+                 Guid="6d8a2c41-3f09-4b7e-9a15-c4e2d07b8f63">
+        <CreateFolder>
+          <Permission User="SYSTEM" GenericAll="yes" />
+          <Permission User="Administrators" GenericAll="yes" />
+        </CreateFolder>
+        <util:RemoveFolderEx Id="RemoveDataOnRequest" On="uninstall"
+                             Property="PGDATA" Condition="REMOVE_DATA=1" />
+      </Component>
+    </ComponentGroup>
+<?endif?>
+
+    <ComponentGroup Id="MenuComponents" Directory="MenuFolder">
+      <Component Id="StartMenuShortcut">
+        <!-- The daily driver, as a regular Windows app: launches the tray icon
+             and opens the dashboard window (tray mode opens the window once on a
+             user launch; it stays in the tray after the window is closed). AUMID
+             on the shortcut enables WinRT toasts for the shell (C-2). -->
+        <Shortcut Id="AppShortcut" Name="PracticeGraph"
+                  Target="[INSTALLFOLDER]practicegraph-shell.exe"
+                  Arguments="tray" WorkingDirectory="INSTALLFOLDER"
+                  Icon="PGIcon.ico">
+          <ShortcutProperty Key="System.AppUserModel.ID" Value="PracticeGraph.Agent" />
+        </Shortcut>
+        <!-- One-glance install health in a message box (no console). -->
+        <Shortcut Id="StatusShortcut" Name="PracticeGraph status"
+                  Target="[INSTALLFOLDER]practicegraph-shell.exe"
+                  Arguments="status --ui" WorkingDirectory="INSTALLFOLDER"
+                  Icon="PGIcon.ico" />
+        <RemoveFolder Id="CleanupMenuFolder" On="uninstall" />
+        <!-- HKCU keypath is the canonical validated pattern for shortcut
+             components (ICE38/ICE43), even in per-machine packages. -->
+        <RegistryValue Root="HKCU" Key="Software\PracticeGraph"
+                       Name="ShortcutsInstalled" Type="integer" Value="1"
+                       KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+<?ifdef $(var.EngineBundle) ?>
+    <!-- Optional compiled engine (lane B): one engine exe replaces
+         runtime\ + app\. -->
+    <ComponentGroup Id="EngineComponents" Directory="INSTALLFOLDER">
+      <Component Id="EngineExe">
+        <File Source="$(var.StageDir)\practicegraph-engine.exe" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+<?else?>
+    <ComponentGroup Id="RuntimeFiles" Directory="RuntimeFolder">
+      <Files Include="$(var.StageDir)\runtime\**" />
+    </ComponentGroup>
+    <ComponentGroup Id="AppFiles" Directory="AppFolder">
+      <Files Include="$(var.StageDir)\app\**" />
+    </ComponentGroup>
+<?endif?>
+    <ComponentGroup Id="WebUiFiles" Directory="WebUiFolder">
+      <Files Include="$(var.StageDir)\webui\**" />
+    </ComponentGroup>
+
+    <Feature Id="Main" Title="PracticeGraph" Level="1">
+      <ComponentGroupRef Id="ShellComponents" />
+<?ifdef $(var.MachineInstall) ?>
+      <ComponentGroupRef Id="ProvisioningComponents" />
+<?endif?>
+      <ComponentGroupRef Id="MenuComponents" />
+<?ifdef $(var.EngineBundle) ?>
+      <ComponentGroupRef Id="EngineComponents" />
+<?else?>
+      <ComponentGroupRef Id="RuntimeFiles" />
+      <ComponentGroupRef Id="AppFiles" />
+<?endif?>
+      <ComponentGroupRef Id="WebUiFiles" />
+    </Feature>
+  </Package>
+</Wix>

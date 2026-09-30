@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=PracticeGraph
+Comment=A private daily reading for work with AI
+Exec=/opt/practicegraph/practicegraph %u
+Icon=practicegraph
+Terminal=false
+Categories=Development;Utility;
+MimeType=x-scheme-handler/practicegraph;
+StartupNotify=true
+StartupWMClass=dev.practicegraph.Desktop

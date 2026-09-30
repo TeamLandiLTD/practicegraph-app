@@ -1,0 +1,60 @@
+# PracticeGraph server — production compose (Phase 4 hardening).
+#
+# The pilot keeps using ../compose.yaml; this file is the org-grade profile.
+# Run from the repo root:
+#   docker compose -f deploy/compose.prod.yaml --env-file deploy/.env up -d --build
+#
+# The container stays published on HOST LOOPBACK ONLY. Terminate TLS with a
+# reverse proxy on the same host (deploy/nginx/practicegraph.conf or
+# deploy/Caddyfile) — the bearer token is plaintext without it (NFR-SEC).
+services:
+  practicegraph-server:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:8321:8321" # loopback only; TLS proxy in front (FR-API-6)
+    env_file:
+      - .env # copy .env.example -> .env and fill in real values
+    environment:
+      PG_SERVER_BIND: 0.0.0.0 # container-internal; host mapping stays loopback
+      PG_SERVER_PORT: "8321"
+      PG_SERVER_DB: /data/practicegraph-server.db
+    volumes:
+      - practicegraph-data:/data # the SQLite DB — the only writable state
+    read_only: true # rootfs is immutable; only /data and /tmp are writable
+    tmpfs:
+      - /tmp
+    user: "10001:10001" # non-root (matches the user baked into the image)
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+    healthcheck:
+      # /healthz is unauthenticated and carries nothing org-specific (INV-2).
+      # The slim image has no curl/wget, so probe with the stdlib.
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8321/healthz', timeout=3).status == 200 else 1)",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  practicegraph-data:
