@@ -44,6 +44,12 @@ jobs:
         run: python -m mypy --platform win32
       - name: Tests (fixtures, privacy, integration)
         run: python -m pytest
+      # The inventory is audited against the committed tree, before the frontend
+      # build rewrites webui/assets with a fresh content hash. A dependency bump
+      # that changes the bundle is caught at release time, when the bundle and
+      # the inventory are regenerated together, not on every PR.
+      - name: Audit source export inventory
+        run: python tools/public_source.py --check
       - name: Frontend tests and production build
         working-directory: ui
         shell: pwsh
@@ -55,8 +61,6 @@ jobs:
           npm test
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm run build
-      - name: Audit source export inventory
-        run: python tools/public_source.py --check
       - name: Audit Python dependencies
         run: |
           python -m pip install pip-audit
