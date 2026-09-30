@@ -12,7 +12,7 @@ On an installed Windows build the command lives at `%LOCALAPPDATA%\Programs\Prac
 
 ## Installing
 
-**SmartScreen blocks the installer.** Builds are not yet Authenticode-signed. Choose *More info → Run anyway* once, after verifying the SHA-256 published with the release.
+**SmartScreen blocks the installer.** Public installers are signed (the publisher shown is TeamLandi OOD), but SmartScreen can still object to a newly published version until its download reputation builds. Check the file's Digital Signatures tab and its SHA-256 against `SHA256SUMS.txt` from the release, then choose *More info → Run anyway* once. An installer with no signature is not a public release; do not run it.
 
 **The installer says WebView2 is missing.** The dashboard needs Microsoft WebView2, which ships with current Windows 10 and 11. Install the evergreen runtime from Microsoft, then run the installer again.
 

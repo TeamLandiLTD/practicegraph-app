@@ -8,9 +8,10 @@ releases use Artifact Signing; see the section at the end.
 
 ## Free, org-internal fleet path
 
-PracticeGraph ships an unsigned MSI by default. Unsigned, Windows SmartScreen
-shows "Unknown publisher" and enterprise policy may block the install. This is
-the **free** signing path for a fleet **you administer**: a self-signed
+Public releases are signed through Azure Artifact Signing (the section at the
+end of this document). A build made without `-Sign` or `-SignAzure` is
+unsigned: Windows SmartScreen shows "Unknown publisher" and enterprise policy
+may block the install. This section is the **free** signing path for a fleet **you administer**: a self-signed
 code-signing certificate, pushed to Trusted Publishers via Group Policy or
 Intune. On machines that trust the cert, signed installs show *TeamLandiLTD* as
 a verified publisher and install cleanly — at zero cost.

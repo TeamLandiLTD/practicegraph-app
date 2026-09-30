@@ -13,7 +13,7 @@ Windows 10 or 11 with Microsoft WebView2, which current builds of both include.
    Get-FileHash .\PracticeGraph-<version>.msi -Algorithm SHA256
    ```
 
-3. Run the installer. Builds are not yet Authenticode-signed, so SmartScreen objects once: *More info → Run anyway*.
+3. Run the installer. Public installers are signed with TeamLandi's publicly trusted certificate and timestamped, so the UAC prompt names TeamLandi OOD. SmartScreen may still ask once while a newly published version builds download reputation; verify the file against `SHA256SUMS.txt` from the release before choosing *More info → Run anyway*.
 4. Open PracticeGraph from the Start menu. The tray icon runs the background tick about every 15 minutes while it is present, and left-clicking it opens the dashboard window.
 
 The application installs under `%LOCALAPPDATA%\Programs\PracticeGraph` with a readable Python engine, the built dashboard, LICENSE and NOTICE. `BUILD-INFO.txt` in that folder records the source commit the build came from. The engine's command line is available as:
