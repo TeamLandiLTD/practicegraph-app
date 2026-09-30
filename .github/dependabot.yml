@@ -4,6 +4,18 @@ updates:
     directory: /
     schedule: {interval: weekly}
     open-pull-requests-limit: 5
+    # The packages that ship inside the agent are hash-pinned per wheel in
+    # packaging/shipped-requirements.txt and bumped through the release
+    # process, which regenerates those pins; a Dependabot bump rewrites the
+    # file with every platform's hashes and fails the packaging tests.
+    # Security alerts for them still fire.
+    ignore:
+      - dependency-name: tzdata
+      - dependency-name: tzlocal
+      - dependency-name: cffi
+      - dependency-name: cryptography
+      - dependency-name: pycparser
+      - dependency-name: truststore
   - package-ecosystem: npm
     directory: /ui
     schedule: {interval: weekly}

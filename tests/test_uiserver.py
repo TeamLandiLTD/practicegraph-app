@@ -709,11 +709,24 @@ def test_currency_endpoint_is_a_closed_set_and_fetches_missing_rates(
         return "pulled"
 
     monkeypatch.setattr(uiserver_module, "pull_fx_rates", pull)
+    # Count what the endpoint itself triggers. The background refresh also
+    # pulls rates once the currency is not USD, and on a slow runner a refresh
+    # cycle can land between two switches; counting every pull made this test
+    # flaky (2026-09-30, five unrelated PRs).
+    triggers: list[str] = []
+    fetch_rates_async = server.fetch_rates_async
+
+    def counted_fetch() -> None:
+        triggers.append(read_prefs(tmp_path).currency)
+        fetch_rates_async()
+
+    monkeypatch.setattr(server, "fetch_rates_async", counted_fetch)
     status, body = _post(endpoint, {"code": "EUR"})
     assert status == 200 and body == {"ok": True}
     _wait_for_rates(server)
     # The rates were missing, so the change downloaded them at once.
-    assert pulls == ["EUR"] and read_prefs(tmp_path).currency == "EUR"
+    assert triggers == ["EUR"] and pulls[:1] == ["EUR"]
+    assert read_prefs(tmp_path).currency == "EUR"
     _status, model = _get(f"{base}/api/view?token={token}")
     assert model["currency"]["code"] == "EUR" and model["currency"]["factor"] == "0.8"
     assert model["currency"]["date"] == "2026-09-29"
@@ -722,7 +735,7 @@ def test_currency_endpoint_is_a_closed_set_and_fetches_missing_rates(
     assert _post(endpoint, {"code": "USD"})[0] == 200
     assert _post(endpoint, {"code": "EUR"})[0] == 200
     _wait_for_rates(server)
-    assert pulls == ["EUR"]
+    assert triggers == ["EUR"]
 
     for bad in ({"code": "eur"}, {"code": "XAU"}, {"code": 1}, {}):
         status, err = _post(endpoint, bad)
