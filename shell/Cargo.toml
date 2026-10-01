@@ -14,7 +14,7 @@ windows-service = "0.8"
 # Native dashboard window (`app` mode): tao owns the window/event loop,
 # wry hosts the evergreen WebView2. Pinned exact (spec: pin current stable).
 tao = "=0.37.1"
-wry = "=0.55.1"
+wry = "=0.57.0"
 
 [dependencies.windows-sys]
 version = "0.61"
