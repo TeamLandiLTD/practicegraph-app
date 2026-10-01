@@ -168,4 +168,4 @@ Issues and pull requests are welcome. Start with a small issue that describes th
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). The hand-curated editions served to the app are published separately under their own content terms; forks can point the app at another compatible catalog host. PracticeGraph is made by [Team Landi](https://teamlandi.com).
+Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). PracticeGraph is provided as is, without warranty of any kind, and its authors accept no liability for its use or for anything it reads or writes on your machine; sections 7 and 8 of the licence say so in full. It runs entirely on your computer and writes only to its own data directory, and you decide which logs it may read. The hand-curated editions served to the app are published separately under their own content terms; forks can point the app at another compatible catalog host. PracticeGraph is made by [Team Landi](https://teamlandi.com).

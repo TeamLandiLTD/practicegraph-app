@@ -410,6 +410,6 @@ ui/src/urls.js
 ui/vite.config.js
 uv.lock
 webui/assets/index-B0qiSzXZ.css
-webui/assets/index-F8ioh5IZ.js
+webui/assets/index-FSF-Z7Ng.js
 webui/assets/team-landi.png
 webui/index.html

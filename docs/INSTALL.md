@@ -2,6 +2,8 @@
 
 PracticeGraph is a per-user desktop application. Each person installs their own copy, which reads their own tools' logs. No administrator rights, service, account or license key is involved.
 
+> PracticeGraph is provided as is, without warranty. You run it on your own machine at your own risk; see sections 7 and 8 of [LICENSE](../LICENSE).
+
 ## Windows
 
 Windows 10 or 11 with Microsoft WebView2, which current builds of both include.
