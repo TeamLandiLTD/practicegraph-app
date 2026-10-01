@@ -32,7 +32,7 @@ features = [
 ]
 
 [dependencies.windows]
-version = "0.58"
+version = "0.61"
 features = [
     "UI_Notifications",
     "Data_Xml_Dom",
