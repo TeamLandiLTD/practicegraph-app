@@ -191,12 +191,6 @@ DEFAULT_ALERT_TOGGLES: dict[str, bool] = {
 }
 DEFAULT_QUIET_START = "22:00"
 DEFAULT_QUIET_END = "07:00"
-# Daily reflection restyle (report/restyle.py): OFF by default. When set to a
-# known provider key, the local CLI of the user's own agent rewrites the
-# recognition band's wording once a day (facts and numbers are never touched
-# — a rewrite that moves a statistic is rejected). "off"/unknown -> templates.
-REFLECTION_STYLE_PROVIDERS: tuple[str, ...] = ("claude", "codex")
-DEFAULT_REFLECTION_STYLE = "off"
 # Billing mode (economy reading, AM-1 dual denomination): how this person pays
 # for model use. "subscription" leads the economy surfaces with window share
 # and labels every dollar figure API-equivalent (list-price equivalence is
@@ -223,9 +217,6 @@ class Prefs:
     alerts_enabled: dict[str, bool]
     quiet_start: str
     quiet_end: str
-    # "off" (default) or a REFLECTION_STYLE_PROVIDERS key: the local agent CLI
-    # that restyles the reflection band's wording daily (facts stay fixed).
-    reflection_style: str = DEFAULT_REFLECTION_STYLE
     # BILLING_MODES value: the economy reading's denomination lens (AM-1).
     billing_mode: str = DEFAULT_BILLING_MODE
     # PROFILES value: which audience the page speaks to. "coding" is
@@ -259,12 +250,6 @@ def read_prefs(data_dir: Path) -> Prefs:
             quiet_start = quiet_raw["start"]
         if isinstance(quiet_raw.get("end"), str):
             quiet_end = quiet_raw["end"]
-    style_raw = values.get("reflection_style")
-    reflection_style = (
-        style_raw
-        if isinstance(style_raw, str) and style_raw in REFLECTION_STYLE_PROVIDERS
-        else DEFAULT_REFLECTION_STYLE
-    )
     billing_raw = values.get("billing_mode")
     billing_mode = (
         billing_raw
@@ -295,7 +280,6 @@ def read_prefs(data_dir: Path) -> Prefs:
         alerts_enabled=alerts,
         quiet_start=quiet_start,
         quiet_end=quiet_end,
-        reflection_style=reflection_style,
         billing_mode=billing_mode,
         profile=profile,
         capability_paths=paths,

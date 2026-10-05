@@ -13,7 +13,7 @@ import time
 from datetime import UTC, datetime
 from pathlib import Path
 
-from practicegraph import __version__, winsec
+from practicegraph import __version__
 from practicegraph.alerts import AlertContext, evaluate
 from practicegraph.analysis.advisor import record_advisor_ledger
 from practicegraph.analysis.advisor_receipts import gather_receipts
@@ -60,17 +60,8 @@ from practicegraph.history import ingest, snapshot_for_day
 from practicegraph.news_notifications import evaluate_news
 from practicegraph.news_notifications import reading as news_reading
 from practicegraph.report.coach import (
-    coaching_as_style_items,
     mark_acknowledgment,
     record_ledger_entry,
-)
-from practicegraph.report.restyle import (
-    COACH_STYLE_META_KEY,
-    STYLE_META_KEY,
-    STYLE_PROVIDERS,
-    build_style_cache,
-    cached_styled,
-    restyle_reflections,
 )
 from practicegraph.report.shell import (
     ShellExtras,
@@ -117,7 +108,6 @@ _TICK_CATEGORIES = (
     "ui_server",
     "collect",
     "report_artifact",
-    "restyle",
     "ledger",
     "emit_build",
     "emit_flush",
@@ -125,11 +115,6 @@ _TICK_CATEGORIES = (
     "news_alerts",
     "update_alerts",
 )
-
-# Closed restyle outcomes (a daily, best-effort, local-only styling pass).
-OUTCOME_SKIPPED_STYLE_OFF = "skipped_style_off"
-OUTCOME_SKIPPED_STYLE_FRESH = "skipped_fresh"
-OUTCOME_SKIPPED_STYLE_EMPTY = "skipped_nothing_to_style"
 
 
 def initialize(env: dict[str, str]) -> Path:
@@ -163,7 +148,7 @@ def _write_report_artifact(
 ) -> tuple[bool, ShellExtras]:
     """Render today's shell report; return (first-render-of-day, extras).
     The first-render flag feeds the daily-report-ready alert; the extras are
-    reused by the restyle stage so the reflections are composed only once."""
+    reused by the ledger stage so the surfaces are composed only once."""
     day = now.astimezone(UTC).date()
     snapshot = snapshot_for_day(store, day, source_health)
     schedule = read_schedule_profile(config.data_dir)
@@ -182,54 +167,6 @@ def _write_report_artifact(
     first_today = store.meta_get("last_report_day") != day.isoformat()
     store.meta_set("last_report_day", day.isoformat())
     return first_today, extras
-
-
-def _restyle_items(store: Store, prefs: Prefs, items: list[dict[str, str]], meta_key: str) -> str:
-    """Daily wording refresh for one styled surface (report/restyle.py): the
-    recognition band or the coaching cues, same pipeline, separate cache.
-
-    Off unless the user named a provider; otherwise a fingerprint of today's
-    items gates the spend — a same-source cache is reused and no model runs. On
-    a genuine change the local CLI restyles, every rewrite is validated back
-    against the facts (numbers + copy rules), and only accepted lines are
-    cached. Fail-open and local-only: any failure leaves the deterministic text."""
-    if winsec.is_local_system():
-        # Restyle shells out to the user's own Claude/Codex CLI — a per-user
-        # feature. Under LocalSystem there is no such CLI, and resolving an
-        # executable by name in a SYSTEM context is a planted-binary EoP, so the
-        # service never restyles regardless of the configured provider.
-        return OUTCOME_SKIPPED_STYLE_OFF
-    provider = STYLE_PROVIDERS.get(prefs.reflection_style)
-    if provider is None:
-        return OUTCOME_SKIPPED_STYLE_OFF
-    if not items:
-        return OUTCOME_SKIPPED_STYLE_EMPTY
-    if cached_styled(items, store.meta_get(meta_key)) is not None:
-        return OUTCOME_SKIPPED_STYLE_FRESH  # today's source already styled
-    styled = restyle_reflections(items, provider)
-    doc = build_style_cache(items, styled, datetime.now(UTC).isoformat(timespec="seconds"))
-    # Cache written even when nothing was accepted, so a barren result does not
-    # re-spend every tick — the fingerprint holds until the source changes.
-    store.meta_set(meta_key, json.dumps(doc, sort_keys=True))
-    return OUTCOME_OK
-
-
-def _restyle_reflections(store: Store, prefs: Prefs, extras: ShellExtras) -> str:
-    """Restyle the recognition band and the coaching cues (each cached apart).
-    Both share one provider setting and one tick outcome — a fresh-daily voice
-    for the two composed surfaces. Returns the combined outcome (off/empty/fresh
-    only when BOTH are, else ok)."""
-    reflect = _restyle_items(store, prefs, extras.reflections_raw, STYLE_META_KEY)
-    coach = _restyle_items(
-        store,
-        prefs,
-        coaching_as_style_items(extras.coaching_raw),
-        COACH_STYLE_META_KEY,
-    )
-    # ok if either surface actually restyled; otherwise report the shared skip.
-    if OUTCOME_OK in (reflect, coach):
-        return OUTCOME_OK
-    return reflect  # both skipped for the same reason (off / empty / fresh)
 
 
 def _evaluate_alerts(
@@ -435,17 +372,6 @@ def run_tick(env: dict[str, str], now: datetime | None = None) -> dict[str, str]
         outcomes["report_artifact"] = OUTCOME_OK
     except Exception:
         outcomes["report_artifact"] = OUTCOME_ERROR
-
-    # Daily wording refresh for the recognition band: local-only, best-effort,
-    # facts frozen. Never runs (and never spends) unless the composed
-    # sentences changed since the last styling and the user opted in.
-    try:
-        if report_extras is None:
-            outcomes["restyle"] = OUTCOME_ERROR
-        else:
-            outcomes["restyle"] = _restyle_reflections(store, prefs, report_extras)
-    except Exception:
-        outcomes["restyle"] = OUTCOME_ERROR
 
     # Coaching acknowledgment ledger (A3): record this week's cue-pillar and its
     # baseline, and retire any entry whose ack window has fully passed. The ONLY

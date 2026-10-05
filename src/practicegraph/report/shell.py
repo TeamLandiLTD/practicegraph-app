@@ -181,8 +181,6 @@ from practicegraph.report.brief import Brief, build_brief
 from practicegraph.report.coach import (
     AckLine,
     CoachPillar,
-    apply_styled_cues,
-    coaching_as_style_items,
     compose_acknowledgment,
     compose_coaching,
     training_load,
@@ -199,11 +197,6 @@ from practicegraph.report.design import (
 from practicegraph.report.format import compact, count, duration_hm, percent, usd
 from practicegraph.report.observation import PracticeObservation, compose_observation
 from practicegraph.report.reflections import compose_reflections
-from practicegraph.report.restyle import (
-    COACH_STYLE_META_KEY,
-    STYLE_META_KEY,
-    cached_styled,
-)
 from practicegraph.report.viewmodel import (
     RIBBON_SCALE,
     day_ribbon_shape,
@@ -612,10 +605,7 @@ class ShellExtras:
     advisor: AdvisorBoard | None = None
     # The practice check-in: one CoachPillar per pillar (pattern/focus/
     # discipline/craft), composed locally from the dimensions + rhythm.
-    # `coaching` is what the view shows (styled if a daily restyle is cached);
-    # `coaching_raw` is the deterministic source the restyle stage reads.
     coaching: list[CoachPillar] = field(default_factory=list)
-    coaching_raw: list[CoachPillar] = field(default_factory=list)
     # The conditioning readout (analysis/conditioning.py): up to three
     # composite fitness-level readings — capacity, load balance, composure —
     # computed indirectly from the behavioral record. An unavailable reading
@@ -693,10 +683,7 @@ class ShellExtras:
     rhythm_marks_interactive: int = 0
     # The reflection band (report/reflections.py): render-ready sentences
     # from 28-day cohort math. Local-only forever — view model, never wire.
-    # `reflections` is styled-if-cached (what the view shows); `reflections_raw`
-    # is the deterministic source the restyle stage fingerprints on.
     reflections: list[dict[str, str]] = field(default_factory=list)
-    reflections_raw: list[dict[str, str]] = field(default_factory=list)
     capability: CapabilityReading = field(
         default_factory=lambda: CapabilityReading(
             paths=("knowledge", "software"), paths_confirmed=False,
@@ -957,12 +944,8 @@ def gather_shell_extras(
             continue
         tail_marks.append(tail_mark)
     session_tail = compose_session_tail(tail_marks, schedule, local_today)
-    # The RAW (deterministic, pre-restyle) composed surfaces. The view fields
-    # below overlay the daily restyle onto these; the *_raw fields carry the
-    # un-styled source so the restyle stage fingerprints on the real composer
-    # output, never on already-styled text (which would defeat the once-a-day
-    # cache and re-spend every tick).
-    raw_reflections = compose_reflections(
+    # The composed surfaces: deterministic template wording, shown as composed.
+    reflections = compose_reflections(
         marks_by_day,
         rhythm,
         rhythm_marks_total,
@@ -999,7 +982,7 @@ def gather_shell_extras(
             prompt_tokens // window_turns if window_turns > 0 else 0
         ),
     )
-    raw_coaching = compose_coaching(
+    coaching = compose_coaching(
         performance.readings if performance else (), rhythm
     )
     model_artifact = load_models(store.path.parent)
@@ -1091,8 +1074,7 @@ def gather_shell_extras(
             )
         ),
         advisor=advisor_board,
-        coaching=_coaching_for_view(store, raw_coaching),
-        coaching_raw=raw_coaching,
+        coaching=coaching,
         conditioning=conditioning,
         coach_ack=compose_acknowledgment(store, local_today, schedule),
         weekly_reading=(
@@ -1136,37 +1118,12 @@ def gather_shell_extras(
         ranges=gather_ranges(store, day),
         rhythm_marks_total=rhythm_marks_total,
         rhythm_marks_interactive=rhythm_marks_interactive,
-        reflections=_reflections_for_view(store, raw_reflections),
-        reflections_raw=raw_reflections,
+        reflections=reflections,
         capability=compose_capability_reading(
             store, prefs, local_today, effective_generated_at,
             schedule=schedule,
         ),
     )
-
-
-def _reflections_for_view(
-    store: Store, reflections: list[dict[str, str]]
-) -> list[dict[str, str]]:
-    """Overlay the daily restyle onto the composed band when a valid cache
-    exists for exactly these facts; otherwise the deterministic sentences.
-    The cache read re-validates every styled line against its source (numbers
-    intact, copy clean), so a stale or tampered entry can only ever degrade
-    to the template — never surface an unfaithful claim (report/restyle.py)."""
-    styled = cached_styled(reflections, store.meta_get(STYLE_META_KEY))
-    return styled if styled is not None else reflections
-
-
-def _coaching_for_view(
-    store: Store, pillars: list[CoachPillar]
-) -> list[CoachPillar]:
-    """Overlay the daily restyle onto the coaching cues when a valid cache
-    exists for exactly these cues (same fingerprint + revalidation as the
-    reflection band); otherwise the deterministic cues. Fresh-daily wording
-    with the numbers and copy rules still enforced per cue."""
-    items = coaching_as_style_items(pillars)
-    styled = cached_styled(items, store.meta_get(COACH_STYLE_META_KEY))
-    return apply_styled_cues(pillars, styled) if styled is not None else pillars
 
 
 _KEY_LINE = re.compile(r'^(\s*)"([^"]+)"(: )(.*?)(,?)$')

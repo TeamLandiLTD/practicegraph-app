@@ -123,9 +123,9 @@ def test_org_token_file_is_acl_locked_to_owner(tmp_path: Path) -> None:
 
 
 def test_is_local_system_is_false_for_a_normal_user() -> None:
-    """The restyle guard keys on this: it must never report the ordinary test
-    user (or any non-Windows host) as LocalSystem, or restyle would wrongly be
-    disabled for real users."""
+    """The SYSTEM-context guards (secureio, uiserver) key on this: it must
+    never report the ordinary test user (or any non-Windows host) as
+    LocalSystem, or per-user features would wrongly be refused for real users."""
     assert winsec.is_local_system() is False
 
 

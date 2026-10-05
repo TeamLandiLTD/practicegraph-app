@@ -211,6 +211,8 @@ def test_focus_data_never_reaches_the_wire() -> None:
     )
     usage_terms = ("account_hash", "pool_hash", "parent_id", "replay_", "session_evidence",
                    "transcript", "characters", "resets_at", "quota_snapshots")
+    # No composed sentence, wording or style field has a place on the wire.
+    wording_terms = ("reflection", "wording", "style", "coaching", "cue")
 
     def _keys(value: object) -> list[str]:
         found: list[str] = []
@@ -234,26 +236,26 @@ def test_focus_data_never_reaches_the_wire() -> None:
             + WORKUNIT_TERMS
             + SESSIONTAIL_TERMS
             + usage_terms
+            + wording_terms
         ):
             assert term not in key.lower()
 
 
 def test_reflection_text_has_no_path_to_the_wire() -> None:
-    """The reflection band — and its model-restyled variant — is a local view
-    surface only (NFR-PRV-6). The emit builder must not import or read the
-    reflection composer, the restyle module, or the style cache key: a payload
-    is assembled from counters, never from any sentence shown to the person."""
+    """The reflection band is a local view surface only (NFR-PRV-6). The emit
+    builder must not import or read the reflection composer, and no wording or
+    style field exists on the wire: a payload is assembled from counters, never
+    from any sentence shown to the person."""
     import inspect
 
     from practicegraph import emit
-    from practicegraph.report.restyle import STYLE_META_KEY
 
     source = inspect.getsource(emit)
     assert "reflection" not in source.lower()
-    assert "restyle" not in source.lower()
-    assert STYLE_META_KEY not in source
-    # The emit builder reads no free-form meta blob at all — style/wording
-    # caches live in meta, and a payload never sources a sentence from there.
+    assert "wording" not in source.lower()
+    assert "style" not in source.lower()
+    # The emit builder reads no free-form meta blob at all — a payload never
+    # sources a sentence from the meta table.
     assert "meta_get" not in source
 
 

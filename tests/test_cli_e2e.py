@@ -264,36 +264,3 @@ def test_suggest_and_focus_cli_lifecycle(
     assert main(["hygiene", "--age-days", "1"]) == 0
     out = capsys.readouterr().out
     assert "un-sent emits are never pruned" in out
-
-
-def test_reflect_cli_lifecycle(
-    monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
-    tmp_path: Path,
-) -> None:
-    """The reflection-styling switch: off by default, on names a local
-    provider, off again — and every message stays local-only in tone."""
-    monkeypatch.setenv("PRACTICEGRAPH_DATA_DIR", str(tmp_path / "data"))
-    for key, value in FIXTURE_ENV.items():
-        monkeypatch.setenv(key, value)
-    assert main(["init"]) == 0
-    capsys.readouterr()
-
-    assert main(["reflect", "status"]) == 0
-    assert "OFF" in capsys.readouterr().out
-
-    assert main(["reflect", "on", "claude"]) == 0
-    assert "ON via 'claude'" in capsys.readouterr().out
-    assert main(["reflect", "status"]) == 0
-    status = capsys.readouterr().out
-    assert "ON via 'claude'" in status
-    assert "shared" in status  # local-only reassurance on every status
-
-    assert main(["reflect", "off"]) == 0
-    assert "OFF" in capsys.readouterr().out
-
-    # An unknown provider is rejected at the parser (closed choice set).
-    with pytest.raises(SystemExit):
-        main(["reflect", "on", "gpt-9000"])
-    with pytest.raises(SystemExit):
-        main(["reflect", "bogus-command"])

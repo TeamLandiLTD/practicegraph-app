@@ -5,4 +5,4 @@ deterministically (INV-6), and never puts raw content, paths, or identity into
 its outputs (NFR-PRV-1).
 """
 
-__version__ = "0.2.29"
+__version__ = "0.2.30"

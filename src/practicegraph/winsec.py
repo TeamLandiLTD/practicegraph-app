@@ -165,8 +165,9 @@ if sys.platform == "win32":
 
     def is_local_system() -> bool:
         """True when this process runs as LocalSystem (S-1-5-18). The service
-        uses it to refuse per-user, PATH-resolved subprocess spawns (restyle),
-        which under SYSTEM would be a planted-binary privilege escalation."""
+        uses it to refuse per-user state writes and PATH-resolved subprocess
+        spawns (secureio, uiserver), which under SYSTEM would be a planted-binary
+        privilege escalation."""
         return _current_user_sid() == "S-1-5-18"
 
     def restrict_to_owner_and_admins(path: Path) -> bool:

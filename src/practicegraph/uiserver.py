@@ -318,7 +318,6 @@ class UiServer(ThreadingHTTPServer):
             schedule=schedule,
             local_day=local_today,
             privacy=gather_privacy_status(self.config, self.store),
-            wording_provider=prefs.reflection_style,
         )
         self._view_cache = (now.timestamp(), generation, model)
         return model

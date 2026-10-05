@@ -7,7 +7,6 @@ Exit codes follow FR-DIA-2 conventions: 0 success/healthy, 1 unhealthy,
 from __future__ import annotations
 
 import argparse
-import contextlib
 import json
 import os
 import sys
@@ -29,7 +28,6 @@ from practicegraph.analysis.schedule import (
 )
 from practicegraph.config import (
     CONFIG_FILE_NAME,
-    REFLECTION_STYLE_PROVIDERS,
     read_prefs,
     resolve,
     store_org_token,
@@ -162,21 +160,6 @@ def build_parser() -> argparse.ArgumentParser:
         "record", help="record a focus-timer event (invoked by the shell)"
     )
     focus_record.add_argument("event")
-
-    reflect = subparsers.add_parser(
-        "reflect",
-        help="daily wording refresh for the reflections (local only)",
-    )
-    reflect_sub = reflect.add_subparsers(dest="reflect_command", required=True)
-    reflect_sub.add_parser("status", help="current styling provider (or off)")
-    reflect_sub.add_parser("off", help="use the fixed wording (the default)")
-    reflect_on = reflect_sub.add_parser(
-        "on", help="restyle daily with a local agent CLI (claude or codex)"
-    )
-    reflect_on.add_argument(
-        "provider", choices=REFLECTION_STYLE_PROVIDERS,
-        help="which on-machine CLI rewrites the wording",
-    )
 
     checkin = subparsers.add_parser(
         "checkin",
@@ -506,44 +489,6 @@ def _cmd_focus(args: argparse.Namespace) -> int:
     return 0
 
 
-def _cmd_reflect(args: argparse.Namespace) -> int:
-    env = dict(os.environ)
-    config = resolve(env)
-    if args.reflect_command == "status":
-        prefs = read_prefs(config.data_dir)
-        if prefs.reflection_style in REFLECTION_STYLE_PROVIDERS:
-            print(
-                f"Reflection styling: ON via '{prefs.reflection_style}' "
-                "(local rewording once a day; the numbers stay fixed; nothing is shared)."
-            )
-        else:
-            print("Reflection styling: OFF (fixed wording; nothing is shared).")
-        return 0
-    # on/off both change the setting AND drop any cached styling, so the band
-    # reflects the new mode immediately rather than lingering on stale text.
-    if args.reflect_command == "on":
-        write_config_updates(config.data_dir, {"reflection_style": args.provider})
-        _clear_style_cache(config.data_dir)
-        print(f"Reflection styling is ON via '{args.provider}'.")
-        print("Once a day the local CLI rewords the reflections; a rewrite that")
-        print("changes any number is rejected and the exact wording stands.")
-        return 0
-    write_config_updates(config.data_dir, {"reflection_style": "off"})
-    _clear_style_cache(config.data_dir)
-    print("Reflection styling is OFF: the band uses its fixed wording.")
-    return 0
-
-
-def _clear_style_cache(data_dir: Path) -> None:
-    """Drop the persisted restyle so a mode change takes effect at once."""
-    from practicegraph.report.restyle import STYLE_META_KEY
-
-    store = Store.in_data_dir(data_dir)
-    if store.exists():
-        with contextlib.suppress(Exception):
-            store.meta_set(STYLE_META_KEY, "")
-
-
 def _cmd_config(args: argparse.Namespace) -> int:
     env = dict(os.environ)
     config = resolve(env)
@@ -646,8 +591,6 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_suggest(args)
     if args.command == "focus":
         return _cmd_focus(args)
-    if args.command == "reflect":
-        return _cmd_reflect(args)
     if args.command == "checkin":
         return _cmd_checkin(args)
     if args.command == "ui":

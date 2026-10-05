@@ -556,26 +556,3 @@ def mark_acknowledgment(store: Store, today: date) -> bool:
     if changed:
         _write_ledger(store, entries)
     return changed
-
-
-def coaching_as_style_items(pillars: list[CoachPillar]) -> list[dict[str, str]]:
-    """Present the cues to the restyle pipeline in its shape ({id, tone, text}),
-    so the same local-CLI reword + validate path that freshens the reflection
-    band can freshen the coaching cues. The pillar id keys the cache entry; the
-    cue is the text to reword (numbers preserved by the restyle validator)."""
-    return [
-        {"id": p.pillar, "tone": p.tone, "text": p.cue}
-        for p in pillars
-    ]
-
-
-def apply_styled_cues(
-    pillars: list[CoachPillar], styled_items: list[dict[str, str]]
-) -> list[CoachPillar]:
-    """Overlay restyled cue text back onto the pillars by id, keeping every other
-    field. A pillar with no accepted rewrite keeps its deterministic cue."""
-    styled_by_id = {item["id"]: item["text"] for item in styled_items}
-    return [
-        dataclasses.replace(p, cue=styled_by_id.get(p.pillar, p.cue))
-        for p in pillars
-    ]

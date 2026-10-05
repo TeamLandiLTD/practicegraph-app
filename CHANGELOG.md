@@ -2,6 +2,13 @@
 
 Every build is its own version; a version number is never rebuilt or reused. Windows installers, their SBOMs and the signed update manifests are attached to the [Releases](https://github.com/TeamLandiLTD/practicegraph-app/releases) page, which is the complete ledger.
 
+## 0.2.30 — 2026-10-01
+
+- The optional wording refresh through a local Claude or Codex CLI is removed (`practicegraph reflect`, the `reflection_style` setting). All wording now comes from the app's own templates, and nothing composed from your activity is ever sent to a model provider. A `reflection_style` entry left in config.json is ignored.
+- A downloaded exchange-rate file in a wide encoding is refused outright; the ECB file is plain UTF-8, and a UTF-16 document could have hidden an entity declaration from the parser's byte-level check.
+- Windows: the window and WebView libraries (tao, wry) and the Windows API crates are updated, verified by building the shell and running the window.
+- The README, NOTICE and the install guide state plainly that the software is provided as is, without warranty or liability, as the Apache-2.0 licence already says in sections 7 and 8.
+
 ## 0.2.29 — 2026-09-30
 
 - Update notices are now verifiable: the client carries the maintainer's release-signing public key, so a signed `update.json` on a later release will show one in-app notice and one native toast per newer version. Nothing is downloaded or installed automatically; earlier versions carried no key and show no notices.

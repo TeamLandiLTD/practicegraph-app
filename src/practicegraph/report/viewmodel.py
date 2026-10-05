@@ -535,7 +535,6 @@ def view_model(
     schedule: ScheduleProfile | None = None,
     local_day: date | None = None,
     privacy: PrivacyStatus | None = None,
-    wording_provider: str = "off",
 ) -> dict[str, object]:
     """Everything a surface needs, JSON-able, closed keys. The interactive
     app serves this verbatim from `GET /api/view`."""
@@ -575,9 +574,6 @@ def view_model(
                 "queued_count": sum(
                     value for key, value in privacy.queue_counts.items()
                     if key in {"pending", "retry"}
-                ),
-                "wording_provider": (
-                    wording_provider if wording_provider in {"claude", "codex"} else "off"
                 ),
             } if privacy is not None else None
         ),
